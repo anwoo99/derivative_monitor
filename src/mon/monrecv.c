@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
         fep_log(fep, "thread join() (%s:%s) return: %d", fep->config.ports[ii].host, fep->config.ports[ii].name, result);
     }
 
-    //fep_close(fep);
+    fep_close(fep);
     return (0);
 }
 

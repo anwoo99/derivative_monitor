@@ -3,6 +3,7 @@
         "config.h": "c",
         "database.h": "c",
         "parson.h": "c",
-        "main.h": "c"
+        "main.h": "c",
+        "context.h": "c"
     }
 }

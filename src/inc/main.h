@@ -65,4 +65,7 @@ void fep_log(FEP *fep, int level, const char *format, ...);
 unsigned long djb2(const char *str);
 int fep_shminit(FEP *fep);
 
+/* close.c */
+void fep_close(FEP *fep);
+
 #endif

@@ -20,7 +20,7 @@ void usage(const char *who)
 
 int main(int argc, char *argv[])
 {
-    FEP *fep;
+    FEP *fep = NULL;
     RECVCTX recvctx[MAX_PORT];
     char *whoami;
     char exnm[32];
@@ -34,6 +34,7 @@ int main(int argc, char *argv[])
 
     strcpy(exnm, argv[1]);
 
+    
     fep = fep_open(exnm, MD_RDWR);
 
     if (fep == NULL)
@@ -49,7 +50,7 @@ int main(int argc, char *argv[])
         pthread_create(&recvctx[ii].thread, NULL, recv_to_send, &recvctx[ii]);
     }
 
-    for (ii = 0; ii <= fep->config.nport; ii++)
+    for (ii = 0; ii < fep->config.nport; ii++)
     {
         pthread_join(recvctx[ii].thread, (void *)&result);
         fep_log(fep, "thread join() (%s:%s) return: %d", fep->config.ports[ii].host, fep->config.ports[ii].name, result);
@@ -106,7 +107,7 @@ int port_confiuration(FEP *fep, int seqn)
 
     memset(&mreq, 0, sizeof(mreq));
     mreq.imr_multiaddr.s_addr = inet_addr(port->ipad);
-    mreq.imr_interface.s_addr = inet_addr(port->nic);
+    mreq.imr_interface.s_addr = inet_addr(port->nic_address);
 
     if (setsockopt(sock, IPPROTO_IP, IP_ADD_MEMBERSHIP, (void *)&mreq, sizeof(mreq)) < 0)
     {

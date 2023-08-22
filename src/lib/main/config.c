@@ -19,6 +19,35 @@ int convert_logLevel(const char *logLevel)
         return -1;
 }
 
+void get_nic_address(char *nic_address, char *nic_name)
+{
+    struct ifaddrs *addrs, *tmp;
+    struct sockaddr_in *sa;
+    char *addr;
+
+    getifaddrs(&addrs);
+    tmp = addrs;
+
+    while (tmp)
+    {
+        if (tmp->ifa_addr && tmp->ifa_addr->sa_family == AF_INET)
+        {
+            sa = (struct sockaddr_in *)tmp->ifa_addr;
+            addr = inet_ntoa(sa->sin_addr);
+
+            if (strcmp(tmp->ifa_name, nic_name) == 0)
+            {
+                strcpy(nic_address, addr);
+                break;
+            }
+        }
+        tmp = tmp->ifa_next;
+    }
+
+    freeifaddrs(addrs);
+    return;
+}
+
 // Function to parse JSON string and populate CONFIG structure
 void parse_config_json(CONFIG *config, JSON_Value *root_value)
 {
@@ -28,7 +57,7 @@ void parse_config_json(CONFIG *config, JSON_Value *root_value)
     JSON_Object *settings_object;
     JSON_Array *ports_array;
     size_t ports_count;
-    size_t i, j; 
+    size_t i, j;
 
     root_object = json_value_get_object(root_value);
 
@@ -57,10 +86,15 @@ void parse_config_json(CONFIG *config, JSON_Value *root_value)
         port->seqn = i + 1;
         port->running = strcmp(json_object_get_string(port_object, "running"), "ON") == 0 ? true : false;
         snprintf(port->name, sizeof(port->name), "%s", json_object_get_string(port_object, "name"));
+        snprintf(port->host, sizeof(port->host), "%s", json_object_get_string(port_object, "host"));
         snprintf(port->type, sizeof(port->type), "%s", json_object_get_string(port_object, "type"));
         snprintf(port->format, sizeof(port->format), "%s", json_object_get_string(port_object, "format"));
         snprintf(port->ipad, sizeof(port->ipad), "%s", json_object_get_string(port_object, "ipad"));
         port->port = (int)json_object_get_number(port_object, "port");
+        snprintf(port->nic_name, sizeof(port->nic_name), "%s", json_object_get_string(port_object, "nic"));
+
+        get_nic_address(port->nic_address, port->nic_name);
+
         port->intv = (int)json_object_get_number(port_object, "intv");
 
         if (port->intv == 0)
@@ -100,13 +134,12 @@ int fep_config(FEP *fep)
     JSON_Value *rootValue;
 
     sprintf(filename, "%s/%s.json", ETC_DIR, fep->exnm);
- 
+
     rootValue = json_parse_file(filename);
 
     if (!rootValue)
-        return(-1);
-    
-    parse_config_json(config, rootValue);
+        return (-1);
 
+    parse_config_json(config, rootValue);
     return 0;
 }

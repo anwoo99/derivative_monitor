@@ -1,3 +1,6 @@
+#ifndef _SCHEMA_H
+#define _SCHEMA_H
+
 #include <unistd.h>
 
 #define SYMB_LEN 128
@@ -91,3 +94,5 @@ typedef struct
     MDQUOT offi;         /* LME Official Unofficial Price */
     MDDEPT dept;         /* Depth */
 } FOLDER;
+
+#endif

@@ -1,3 +1,7 @@
+#ifndef _CONFIG_H
+#define _CONFIG_H
+
+
 #define MAX_PORT 64
 #define MAX_TIME 10
 
@@ -75,3 +79,5 @@ typedef struct
     PORT ports[MAX_PORT];
     int nport;
 } CONFIG;
+
+#endif

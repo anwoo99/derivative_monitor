@@ -10,8 +10,8 @@ LFLAGS=$(MY_LFLAGS) -shared -lc -lnsl
 AFLAGS=$(MY_AFLAGS)
 
 
-X_GFLIB=libMON.a
-S_GFLIB=libMON.so
+X_GFLIB=libMAIN.a
+S_GFLIB=libMAIN.so
 
 OBJF=config.o log.o open.o shm.o parson.o
 

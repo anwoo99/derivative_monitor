@@ -20,23 +20,15 @@ int convert_logLevel(const char *logLevel)
 }
 
 // Function to parse JSON string and populate CONFIG structure
-void parse_config_json(CONFIG *config, char *json_string)
+void parse_config_json(CONFIG *config, JSON_Value *root_value)
 {
     char logLevel[32];
     char running[32];
-    JSON_Value *root_value;
     JSON_Object *root_object;
     JSON_Object *settings_object;
     JSON_Array *ports_array;
     size_t ports_count;
-    size_t i, j;
-
-    root_value = json_parse_string(json_string);
-
-    if (!root_value)
-    {
-        return;
-    }
+    size_t i, j; 
 
     root_object = json_value_get_object(root_value);
 
@@ -105,24 +97,16 @@ int fep_config(FEP *fep)
     long file_size;
     char *json_string;
     FILE *file;
+    JSON_Value *rootValue;
 
     sprintf(filename, "%s/%s.json", ETC_DIR, fep->exnm);
+ 
+    rootValue = json_parse_file(filename);
 
-    file = fopen(filename, "r");
+    if (!rootValue)
+        return(-1);
+    
+    parse_config_json(config, rootValue);
 
-    if (!file)
-        return -1;
-
-    /* Get the content in xxxx.json */
-    if (-1 == get_config_json_string(file, &json_string))
-    {
-        fclose(file);
-        return -1;
-    }
-
-    parse_config_json(config, json_string);
-
-    free(json_string);
-    fclose(file);
     return 0;
 }

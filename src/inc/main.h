@@ -1,3 +1,7 @@
+#ifndef _MAIN_H_
+#define _MAIN_H_
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -60,3 +64,5 @@ void fep_log(FEP *fep, int level, const char *format, ...);
 /* shm.c */
 unsigned long djb2(const char *str);
 int fep_shminit(FEP *fep);
+
+#endif

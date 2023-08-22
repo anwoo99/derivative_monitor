@@ -1,3 +1,6 @@
+#ifndef _CONTEXT_H
+#define _CONTEXT_H
+
 #include "main.h"
 
 typedef struct
@@ -14,3 +17,5 @@ typedef struct
     int mrec;
     int vrec;
 } MDARCH;
+
+#endif

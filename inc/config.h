@@ -1,43 +1,77 @@
+#define MAX_PORT 64
+#define MAX_TIME 10
+
 typedef struct
 {
     char name[16];
     char type[16];
     char desc[128];
     char timezone[16];
+    int room;
     int logLevel;
 } SETTINGS;
 
 typedef struct
 {
-    char wday[16];
-    char time[16];
-} WATCH_TIME;
+    char start[16];
+    char end[16];
+} WDAY;
 
 typedef struct
 {
-    WATCH_TIME start;
-    WATCH_TIME to;
-} WATCH;
+    char start[16];
+    char end[16];
+} WINDOW;
 
 typedef struct
 {
-    char host[32];
-    char nic[32];
-    char ipad[32];
-    char post[32];
-} ADDRESS;
+    WDAY wday;
+    WINDOW window;
+} TIME;
 
 typedef struct
 {
+    int interval;
+    time_t last_time;
+    unsigned int packet_size_per_check;
+    unsigned int total_packet_size;
+    int total_check_count;
+    double current_speed;
+    double total_speed;
+    double peak_speed;
+    time_t peak_time;
+    int prev_checkhour;
+    int next_checkhour;
+    int curr_checkhour;
+} TAFFIC_TABLE;
+
+typedef struct
+{
+    int seqn;
+    int running;
     char name[16];
+    char host[16];
+    char nic[32];
     char type[16];
-    char desc[128];
-    WATCH watch[8];
-    ADDRESS address[32];
+    char format[16];
+    char ipad[32];
+    int port;
+    int intv;
+    TIME times[32];
+    int sock;
+    struct ip_mreq mreq;
+    char ipc_name[64];
+    int domain_socket;
+    struct sockaddr_un target_addr;
+    struct sockaddr_un target_addr_for_test;
+    unsigned int recv[24];
+    unsigned int lost[24];
+    TRAFFIC_TABLE traff[24];
 } PORT;
 
 typedef struct
 {
     SETTINGS settings;
-    PORT ports[32];
+    PORT ports[MAX_PORT];
+    int nport;
 } CONFIG;

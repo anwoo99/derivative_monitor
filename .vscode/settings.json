@@ -1,5 +1,8 @@
 {
     "files.associations": {
-        "config.h": "c"
+        "config.h": "c",
+        "database.h": "c",
+        "parson.h": "c",
+        "main.h": "c"
     }
 }

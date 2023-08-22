@@ -23,7 +23,7 @@
 #include <mysql/mysql.h>
 #include "parson.h"
 #include "config.h"
-#include "database.h"
+#include "schema.h"
 
 /* Logging Flag */
 #define FL_MUST 0
@@ -36,18 +36,26 @@
 #define MD_RDONLY 0x01 // 0000 0001
 #define MD_RDWR 0x02   // 0000 0010
 
+/* DEFINED MESSAGE */
+#define NOT_RECEIVED "DAKLWalds1231ADLKNND455LADNL"
+
 /* Variables */
 typedef struct
 {
     char exnm[16];     // Exchange Name
     char procname[32]; // Process Name
     CONFIG config;
-    int whoami;       // FEP Open Mode
-    MYSQL *connector; // Database Connector
-    DATABASE database;
+    int whoami; // FEP Open Mode
+    void *fold; // Folder Pointer
+    void *arch; // Archive Pointer
 } FEP;
 
-/* Functions */
+/* config.c */
 int fep_config(FEP *fep);
-MYSQL *get_database(FEP *fep);
+
+/* log.c */
 void fep_log(FEP *fep, int level, const char *format, ...);
+
+/* shm.c */
+unsigned long djb2(const char *str);
+int fep_shminit(FEP *fep);

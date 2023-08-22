@@ -1,0 +1,61 @@
+include ../../environments
+
+LIB=$(LIB_DIR)
+INC=$(INC_DIR)
+
+LD=ld
+IFLAGS=-I../inc -I../../inc
+CFLAGS=-O $(IFLAGS) $(MY_CFLAGS) $(MY_SFLAGS)
+LFLAGS=$(MY_LFLAGS) -shared -lc -lnsl 
+AFLAGS=$(MY_AFLAGS)
+AROPTS=$(MY_AROPTS)
+
+X_GFLIB=libMON.a
+S_GFLIB=libMON.so
+
+OBJF=config.o log.o open.o shm.o parson.o
+
+INCF=../../inc/config.h ../../inc/log.h ../../inc/open.h ../../inc/shm.h ../../inc/parson.h
+
+# Default Rules:
+.c:
+	$(CC) $(CFLAGS) $(LFLAGS) $< -o $@
+.c~:
+	$(GET) $(GFLAGS) -p $< > $*.c
+	$(CC) $(CFLAGS) $(LFLAGS) $*.c -o $@
+	-rm -f $*.c
+.c.a:
+	$(CC) -c $(CFLAGS) $<
+	$(AR) $(AFLAGS) $@ $*.o; rm -f $*.o 
+.s~.s:
+	$(GET) $(GFLAGS) $<
+.h~.h:
+	$(GET) $(GFLAGS) $<
+.c~.c:
+	$(GET) $(GFLAGS) $<
+
+all: $(S_GFLIB)
+
+$(S_GFLIB): $(X_GFLIB)
+	$(AR) $(AROPTS) -x $(X_GFLIB) $(OBJF)
+	$(LD) -o $(S_GFLIB) $(OBJF) $(LFLAGS)
+	rm -f $(OBJF)
+
+$(X_GFLIB): $(OBJF)
+	$(AR) $(AROPTS) $@ $(OBJF)
+	if [ -s /usr/bin/ranlib ]; then ranlib $@; fi
+	@echo $(X_GFLIB) is up-to-date.
+
+install: all
+	install -m 0644 ../../inc/config.h $(INC)
+	install -m 0644 ../../inc/log.h $(INC)
+	install -m 0644 ../../inc/open.h $(INC)
+	install -m 0644 ../../inc/shm.h $(INC)
+	install -m 0644 ../../inc/parson.h $(INC)
+	install $(X_GFLIB) $(LIB)/$(X_GFLIB)
+	install $(S_GFLIB) $(LIB)/$(S_GFLIB)
+
+clean:
+	rm -f $(X_GFLIB)
+	rm -f $(S_GFLIB)
+	rm -f $(OBJF)

@@ -61,14 +61,13 @@ FEP *fep_open(const char *exnm, int flag)
 
     /* Get the running process name */
     get_procname(fep->procname);
-    
-    /* Get the databse connector */
-    if(-1 == get_database(fep))
-    {
-        fep_log(fep, FL_ERROR, "Cannot get the database connector..!");
-        return NULL;
-    }
 
+    if (fep_shminit(fep) != 0)
+    {
+        fep_log(fep, FL_ERROR, "Cannot initialize shared memory !!!");
+        free(fep);
+        return (NULL);
+    }
 
     return (fep);
 }

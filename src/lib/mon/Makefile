@@ -8,14 +8,14 @@ IFLAGS=-I../inc -I../../inc
 CFLAGS=-O $(IFLAGS) $(MY_CFLAGS) $(MY_SFLAGS)
 LFLAGS=$(MY_LFLAGS) -shared -lc -lnsl 
 AFLAGS=$(MY_AFLAGS)
-AROPTS=$(MY_AROPTS)
+
 
 X_GFLIB=libMON.a
 S_GFLIB=libMON.so
 
 OBJF=config.o log.o open.o shm.o parson.o
 
-INCF=../../inc/config.h ../../inc/log.h ../../inc/open.h ../../inc/shm.h ../../inc/parson.h
+INCF=../../main.h ../../context.h ../../config.h ../../parson.h ../../schema.h
 
 # Default Rules:
 .c:
@@ -37,21 +37,21 @@ INCF=../../inc/config.h ../../inc/log.h ../../inc/open.h ../../inc/shm.h ../../i
 all: $(S_GFLIB)
 
 $(S_GFLIB): $(X_GFLIB)
-	$(AR) $(AROPTS) -x $(X_GFLIB) $(OBJF)
+	$(AR) -x $(X_GFLIB) $(OBJF)
 	$(LD) -o $(S_GFLIB) $(OBJF) $(LFLAGS)
 	rm -f $(OBJF)
 
 $(X_GFLIB): $(OBJF)
-	$(AR) $(AROPTS) $@ $(OBJF)
+	$(AR) -rcs $@ $(OBJF)
 	if [ -s /usr/bin/ranlib ]; then ranlib $@; fi
 	@echo $(X_GFLIB) is up-to-date.
 
 install: all
+	install -m 0644 ../../inc/main.h $(INC)
+	install -m 0644 ../../inc/context.h $(INC)
 	install -m 0644 ../../inc/config.h $(INC)
-	install -m 0644 ../../inc/log.h $(INC)
-	install -m 0644 ../../inc/open.h $(INC)
-	install -m 0644 ../../inc/shm.h $(INC)
 	install -m 0644 ../../inc/parson.h $(INC)
+	install -m 0644 ../../inc/schema.h $(INC)
 	install $(X_GFLIB) $(LIB)/$(X_GFLIB)
 	install $(S_GFLIB) $(LIB)/$(S_GFLIB)
 

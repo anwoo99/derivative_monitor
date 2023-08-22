@@ -21,6 +21,7 @@
 #include <netdb.h>
 #include <sys/un.h>
 #include <mysql/mysql.h>
+#include <stdbool.h>
 #include "parson.h"
 #include "config.h"
 #include "schema.h"

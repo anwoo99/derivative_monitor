@@ -29,6 +29,7 @@ void parse_config_json(CONFIG *config, char *json_string)
     JSON_Object *settings_object;
     JSON_Array *ports_array;
     size_t ports_count;
+    size_t i, j;
 
     root_value = json_parse_string(json_string);
 
@@ -56,13 +57,13 @@ void parse_config_json(CONFIG *config, char *json_string)
 
     config->nport = (ports_count > MAX_PORT) ? MAX_PORT : ports_count;
 
-    for (size_t i = 0; i < ports_count; i++)
+    for (i = 0; i < ports_count; i++)
     {
         JSON_Object *port_object = json_array_get_object(ports_array, i);
         PORT *port = &config->ports[i];
 
         port->seqn = i + 1;
-        port->running = strcmp(json_object_get_string(port_object, "running"), "ON") == 0 ? TRUE : FALSE;
+        port->running = strcmp(json_object_get_string(port_object, "running"), "ON") == 0 ? true : false;
         snprintf(port->name, sizeof(port->name), "%s", json_object_get_string(port_object, "name"));
         snprintf(port->type, sizeof(port->type), "%s", json_object_get_string(port_object, "type"));
         snprintf(port->format, sizeof(port->format), "%s", json_object_get_string(port_object, "format"));
@@ -79,7 +80,7 @@ void parse_config_json(CONFIG *config, char *json_string)
         size_t times_count = json_array_get_count(times_array);
         size_t max_times = (times_count > MAX_TIME) ? MAX_TIME : times_count;
 
-        for (size_t j = 0; j < max_times; j++)
+        for (j = 0; j < max_times; j++)
         {
             JSON_Object *time_object = json_array_get_object(times_array, j);
             TIME *time_period = &port->times[j];

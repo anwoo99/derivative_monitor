@@ -43,7 +43,7 @@ typedef struct
     int prev_checkhour;
     int next_checkhour;
     int curr_checkhour;
-} TAFFIC_TABLE;
+} TRAFFIC_TABLE;
 
 typedef struct
 {

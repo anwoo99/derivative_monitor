@@ -9,7 +9,6 @@ int port_confiuration(FEP *fep, int seqn);
 int domain_socket_configuration(FEP *fep, int seqn);
 void recv_to_send(void *argv);
 
-
 void usage(const char *who)
 {
     if (isatty(1))
@@ -34,12 +33,11 @@ int main(int argc, char *argv[])
 
     strcpy(exnm, argv[1]);
 
-    
     fep = fep_open(exnm, MD_RDWR);
 
     if (fep == NULL)
     {
-        fep_log(fep, FL_ERROR, "fep_open() for %s is failed!", exnm);
+        fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "fep_open() for %s is failed!", exnm);
         return (0);
     }
 
@@ -53,7 +51,7 @@ int main(int argc, char *argv[])
     for (ii = 0; ii < fep->config.nport; ii++)
     {
         pthread_join(recvctx[ii].thread, (void *)&result);
-        fep_log(fep, "thread join() (%s:%s) return: %d", fep->config.ports[ii].host, fep->config.ports[ii].name, result);
+        fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "thread join() (%s:%s) return: %d", fep->config.ports[ii].host, fep->config.ports[ii].name, result);
     }
 
     fep_close(fep);
@@ -80,13 +78,13 @@ int port_confiuration(FEP *fep, int seqn)
 
     if (!multicast)
     {
-        fep_log(fep, FL_ERROR, "Multicast IP is error %s:%d | error(%s)", port->ipad, port->port, strerror(errno));
+        fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "Multicast IP is error %s:%d | error(%s)", port->ipad, port->port, strerror(errno));
         return (-1);
     }
 
     if ((sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
     {
-        fep_log(fep, FL_ERROR, "Cannot open socket for %s:%d | error(%s)", port->ipad, port->port, strerror(errno));
+        fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "Cannot open socket for %s:%d | error(%s)", port->ipad, port->port, strerror(errno));
         return (-1);
     }
 
@@ -100,7 +98,7 @@ int port_confiuration(FEP *fep, int seqn)
 
     if (bind(sock, (struct sockaddr *)&sockin, sizeof(sockin)) != 0)
     {
-        fep_log(fep, FL_ERROR, "Cannot bind for %s:%d | error(%s)", port->ipad, port->port, strerror(errno));
+        fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "Cannot bind for %s:%d | error(%s)", port->ipad, port->port, strerror(errno));
         close(sock);
         return (-1);
     }
@@ -111,7 +109,7 @@ int port_confiuration(FEP *fep, int seqn)
 
     if (setsockopt(sock, IPPROTO_IP, IP_ADD_MEMBERSHIP, (void *)&mreq, sizeof(mreq)) < 0)
     {
-        fep_log(fep, FL_ERROR, "setsockopt error(1) %s:%d | error(%s)", port->ipad, port->port, strerror(errno));
+        fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "setsockopt error(1) %s:%d | error(%s)", port->ipad, port->port, strerror(errno));
         close(sock);
         return (-1);
     }
@@ -121,14 +119,14 @@ int port_confiuration(FEP *fep, int seqn)
 
     if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &intv, sizeof(intv)) < 0)
     {
-        fep_log(fep, FL_ERROR, "setsockopt error(2) %s:%d | error(%s)", port->ipad, port->port, strerror(errno));
+        fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "setsockopt error(2) %s:%d | error(%s)", port->ipad, port->port, strerror(errno));
         close(sock);
         return (-1);
     }
 
     port->sock = sock;
 
-    fep_log(fep, FL_MUST, "Start to receive from '%s:%s'(%s:%d)", port->host, port->name, port->ipad, port->port);
+    fep_log(fep, FL_MUST, GET_CALLER_FUNCTION(), "Start to receive from '%s:%s'(%s:%d)", port->host, port->name, port->ipad, port->port);
     return (0);
 }
 
@@ -140,10 +138,10 @@ int domain_socket_configuration(FEP *fep, int seqn)
     port->domain_socket = socket(PF_FILE, SOCK_DGRAM, 0);
     if (port->domain_socket < 0)
     {
-        fep_log(fep, FL_ERROR, "Failed to set domain socket for '%s' | error(%s)", port->name, strerror(errno));
+        fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "Failed to set domain socket for '%s' | error(%s)", port->name, strerror(errno));
         return (-1);
     }
-    fep_log(fep, FL_DEBUG, "socket() for '%s' complete ..!", port->name);
+    fep_log(fep, FL_DEBUG, GET_CALLER_FUNCTION(), "socket() for '%s' complete ..!", port->name);
 
     /* REAL */
     memset(&port->target_addr, 0, sizeof(port->target_addr));
@@ -168,18 +166,18 @@ void recv_to_send(void *argv)
     char msgb[MSGBUFF];
     struct sockaddr_in sockin;
     socklen_t slen;
-    
+
     // Set the socket for receiving
     if (-1 == port_confiuration(fep, seqn))
     {
-        fep_log(fep, FL_ERROR, "Failed to set port configuration");
+        fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "Failed to set port configuration");
         pthread_exit(NULL);
     }
 
     // Set the socket for Unix Domain Socket (monrecv -> monfep)
     if (-1 == domain_socket_configuration(fep, seqn))
     {
-        fep_log(fep, FL_ERROR, "Failed to set domain socket configuration");
+        fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "Failed to set domain socket configuration");
         pthread_exit(NULL);
     }
 
@@ -193,7 +191,7 @@ void recv_to_send(void *argv)
             /* FOR REAL */
             if (sendto(port->domain_socket, msgb, strlen(msgb), 0, (struct sockaddr *)&port->target_addr, sizeof(port->target_addr)) < 0)
             {
-                fep_log(fep, FL_ERROR, "%s sendto() error(%d|%s)", port->ipc_name, errno, strerror(errno));
+                fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "%s sendto() error(%d|%s)", port->ipc_name, errno, strerror(errno));
                 break;
             }
 
@@ -204,7 +202,7 @@ void recv_to_send(void *argv)
         {
             if (sendto(port->domain_socket, NOT_RECEIVED, strlen(NOT_RECEIVED), 0, (struct sockaddr *)&port->target_addr, sizeof(port->target_addr)) < 0)
             {
-                fep_log(fep, FL_ERROR, "%s sendto() error(%d|%s)", port->ipc_name, errno, strerror(errno));
+                fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "%s sendto() error(%d|%s)", port->ipc_name, errno, strerror(errno));
                 break;
             }
         }

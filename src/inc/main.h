@@ -45,6 +45,9 @@
 /* DEFINED MESSAGE */
 #define NOT_RECEIVED "DAKLWalds1231ADLKNND455LADNL"
 
+/* Print Function's name for logging */
+#define GET_CALLER_FUNCTION() __func__
+
 /* Variables */
 typedef struct
 {

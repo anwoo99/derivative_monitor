@@ -64,7 +64,7 @@ FEP *fep_open(const char *exnm, int flag)
 
     if (fep_shminit(fep) != 0)
     {
-        fep_log(fep, FL_ERROR, "Cannot initialize shared memory !!!");
+        fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "Cannot initialize shared memory !!!");
         free(fep);
         return (NULL);
     }

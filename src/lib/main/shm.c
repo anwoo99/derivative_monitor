@@ -123,7 +123,7 @@ int fep_shminit(FEP *fep)
     arch->mrec = fep->config.settings.room;
     memcpy(&arch->config, &fep->config, sizeof(CONFIG));
 
-    fep_log(fep, FL_MUST,
+    fep_log(fep, FL_MUST, GET_CALLER_FUNCTION(),
                 "\n\n--- [%s] Shared Memory Info ---\n"
                 "- Segment Size: %lu bytes\n"
                 "- Last Access Time: %s"

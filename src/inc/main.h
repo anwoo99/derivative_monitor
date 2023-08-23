@@ -66,7 +66,7 @@ FEP *fep_open(const char *exnm, int flag);
 int fep_config(FEP *fep);
 
 /* log.c */
-void fep_log(FEP *fep, int level, const char *format, ...);
+void fep_log(FEP *fep, int level, const char *caller_function, const char *format, ...);
 
 /* shm.c */
 unsigned long djb2(const char *str);

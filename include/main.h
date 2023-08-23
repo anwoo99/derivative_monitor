@@ -45,6 +45,9 @@
 /* DEFINED MESSAGE */
 #define NOT_RECEIVED "DAKLWalds1231ADLKNND455LADNL"
 
+/* Print Function's name for logging */
+#define GET_CALLER_FUNCTION() __func__
+
 /* Variables */
 typedef struct
 {
@@ -63,7 +66,7 @@ FEP *fep_open(const char *exnm, int flag);
 int fep_config(FEP *fep);
 
 /* log.c */
-void fep_log(FEP *fep, int level, const char *format, ...);
+void fep_log(FEP *fep, int level, const char *caller_function, const char *format, ...);
 
 /* shm.c */
 unsigned long djb2(const char *str);

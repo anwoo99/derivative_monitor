@@ -1,5 +1,7 @@
 #include "main.h"
 
+#define GET_CALLER_FUNCTION() __builtin_return_address(1)
+
 void fep_log(FEP *fep, int level, const char *format, ...)
 {
     time_t korean_time;
@@ -27,7 +29,7 @@ void fep_log(FEP *fep, int level, const char *format, ...)
             mode[0] = 'w';
     }
 
-    snprintf(logmsg, sizeof(logmsg), "%02d/%02d %02d:%02d:%02d ", korean_tm.tm_mon + 1, korean_tm.tm_mday, korean_tm.tm_hour, korean_tm.tm_min, korean_tm.tm_sec);
+    snprintf(logmsg, sizeof(logmsg), "%02d/%02d %02d:%02d:%02d [%s - %s]", korean_tm.tm_mon + 1, korean_tm.tm_mday, korean_tm.tm_hour, korean_tm.tm_min, korean_tm.tm_sec, fep->procname, GET_CALLER_FUNCTION());
 
     va_list vl;
     va_start(vl, format);

@@ -128,7 +128,7 @@ int port_confiuration(FEP *fep, int seqn)
 
     port->sock = sock;
 
-    fep_log(fep, FL_MUST, "Start to receive from UDP %s:%d", port->ipad, port->port);
+    fep_log(fep, FL_MUST, "Start to receive from '%s:%s'(%s:%d)", port->host, port->name, port->ipad, port->port);
     return (0);
 }
 

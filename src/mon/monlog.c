@@ -3,7 +3,7 @@
 
 #define MASTER_NEW_INTERVAL 30.0
 
-int mon_log_path(FEP *fep, PORT *port, int *class_tag, char *logdir, char *filename)
+int mon_log_path(FEP *fep, PORT *port, uint32_t *class_tag, char *logdir, char *filename)
 {
     SETTINGS *settings = &fep->config.settings;
     char data_type[32];
@@ -12,29 +12,29 @@ int mon_log_path(FEP *fep, PORT *port, int *class_tag, char *logdir, char *filen
     struct tm timeinfo;
 
     /* Set the data type */
-    if (*class_tag || MASTER)
+    if (*class_tag & MASTER)
         strcpy(data_type, "master");
-    else if (*class_tag || STATUS)
+    else if (*class_tag & STATUS)
         strcpy(data_type, "status");
-    else if (*class_tag || QUOTE)
+    else if (*class_tag & QUOTE)
         strcpy(data_type, "quote");
-    else if (*class_tag || CANCEL)
+    else if (*class_tag & CANCEL)
         strcpy(data_type, "cancel");
-    else if (*class_tag || SETTLE)
+    else if (*class_tag & SETTLE)
         strcpy(data_type, "settle");
-    else if (*class_tag || OINT)
+    else if (*class_tag & OINT)
         strcpy(data_type, "oint");
-    else if (*class_tag || DEPTH)
+    else if (*class_tag & DEPTH)
         strcpy(data_type, "depth");
-    else if (*class_tag || FND)
+    else if (*class_tag & FND)
         strcpy(data_type, "fnd");
-    else if (*class_tag || MAVG)
+    else if (*class_tag & MAVG)
         strcpy(data_type, "mavg");
-    else if (*class_tag || OFFI)
+    else if (*class_tag & OFFI)
         strcpy(data_type, "offi");
-    else if (*class_tag || WARE)
+    else if (*class_tag & WARE)
         strcpy(data_type, "ware");
-    else if (*class_tag || VOLM)
+    else if (*class_tag & VOLM)
         strcpy(data_type, "volm");
 
     /* Get the date */
@@ -42,14 +42,16 @@ int mon_log_path(FEP *fep, PORT *port, int *class_tag, char *logdir, char *filen
     localtime_r(&current, &timeinfo);
     strftime(date, sizeof(date), "%Y%m%d", &timeinfo);
 
-    sprintf(logdir, "%s/%s/%s/%s/%s", LOG_DIR, port->host, settings->name, port->format, port->name, data_type);
+    sprintf(logdir, "%s/%s/%s/%s/%s/%s", LOG_DIR, port->host, settings->name, port->name, port->format, data_type);
 
-    sprintf(filename, "%s_%02d.dump", date, timeinfo.tm_hour);
+    sprintf(filename, "%s_%03d.dump", date, timeinfo.tm_hour);
 
     /* Create Directory */
     if (-1 == create_directory(logdir))
+    {
+        fep_log(fep, FL_ERROR, "Cannot create direcotry '%s'", logdir);
         return (-1);
-
+    }
     return (0);
 }
 
@@ -57,7 +59,6 @@ void mon_log_write(FEP *fep, char *logpath, const char *format, ...)
 {
     time_t korean_time, utc_time, modified_time;
     struct tm korean_tm, modify_tm;
-    char logpath[128];
     char mode[2] = "a";
     struct stat lstat;
     char logmsg[1024 * 8];
@@ -73,7 +74,7 @@ void mon_log_write(FEP *fep, char *logpath, const char *format, ...)
         mode[0] = (difftime(korean_time, modified_time) > MASTER_NEW_INTERVAL) ? 'w' : 'a';
     }
 
-    snprintf(logmsg, sizeof(logmsg), "%02d/%02d %02d:%02d:%02d ", korean_tm.tm_mon + 1, korean_tm.tm_mday, korean_tm.tm_hour, korean_tm.tm_min, korean_tm.tm_sec);
+    snprintf(logmsg, sizeof(logmsg), "[%02d:%02d:%02d] ", korean_tm.tm_hour, korean_tm.tm_min, korean_tm.tm_sec);
 
     va_list vl;
     va_start(vl, format);
@@ -89,7 +90,7 @@ void mon_log_write(FEP *fep, char *logpath, const char *format, ...)
     fclose(logF);
 }
 
-int mon_log_delete(FEP *fep, char *logdir, int date_limit)
+int mon_log_remove(FEP *fep, char *logdir, int date_limit)
 {
     time_t korean_time, utc_time, modified_time;
     struct tm korean_tm, modify_tm;
@@ -125,7 +126,7 @@ int mon_log_delete(FEP *fep, char *logdir, int date_limit)
 
         if (stat(logpath, &file_stat) == 0)
         {
-            fep_utc2kst(lstat.st_mtime, &modified_time, &modify_tm);
+            fep_utc2kst(file_stat.st_mtime, &modified_time, &modify_tm);
         }
         else
         {
@@ -153,7 +154,7 @@ int mon_log_delete(FEP *fep, char *logdir, int date_limit)
 /* mon_log()             */
 /* 데이터 로깅 함수       */
 /*************************/
-int mon_log(FEP *fep, int seqn, char *msgb, int msgl, int *class_tag, int max_log)
+int mon_log(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *class_tag)
 {
     char logdir[256];
     char filename[128];
@@ -161,11 +162,11 @@ int mon_log(FEP *fep, int seqn, char *msgb, int msgl, int *class_tag, int max_lo
     char master_dump[256];
     SETTINGS *settings = &fep->config.settings;
     RAW_DATA *raw_data = &fep->config.raw_data;
-    PORT *port = &fep->config.ports[seqn];
     int log_mode = FL_DEBUG;
+    int max_date = 1;
 
     /* 호가 로그 필터링 */
-    if ((*class_tag || DEPTH) && !raw_data.depth_log)
+    if ((*class_tag & DEPTH) && !raw_data->depth_log)
         return (0);
 
     /* Make Log Path */
@@ -179,14 +180,17 @@ int mon_log(FEP *fep, int seqn, char *msgb, int msgl, int *class_tag, int max_lo
     mon_log_write(fep, logpath, "%s", msgb);
 
     /* Write Master Dump */
-    if (*class_tag || MASTER)
+    if (*class_tag & MASTER)
     {
         sprintf(master_dump, "%s/%s", logdir, "MASTER.dump");
         mon_log_write(fep, master_dump, "%s", msgb);
     }
 
     /* Remove the old logs */
-    if (-1 == mon_log_delete(fep, logdir, raw_data.max_date))
+    if(!(*class_tag & DEPTH))
+        max_date = raw_data->max_date;
+
+    if (-1 == mon_log_remove(fep, logdir, max_date))
         return (-1);
 
     return (0);

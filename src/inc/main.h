@@ -26,6 +26,7 @@
 #include <mysql/mysql.h>
 #include <stdbool.h>
 #include <ifaddrs.h>
+#include <dirent.h>
 #include "parson.h"
 #include "config.h"
 #include "schema.h"
@@ -62,7 +63,7 @@
 #define FUTURE 0x000080
 #define OPTION 0x000100
 #define SPREAD 0x000200
-#define LME 0x000400
+#define WAREHOUSE 0x000400
 
 /* TRADE TYPE */
 #define STATUS 0x000800
@@ -77,6 +78,9 @@
 #define OFFI 0x100000
 #define WARE 0x200000
 #define VOLM 0x400000
+
+/* EXCHANGE */
+#define LME 0x800000
 
 /* Variables */
 typedef struct
@@ -97,6 +101,7 @@ int fep_config(FEP *fep);
 
 /* log.c */
 void fep_log(FEP *fep, int level, const char *caller_function, const char *format, ...);
+void null_to_space(char *msgb, int msgl);
 
 /* file.c */
 int create_directory(char *dirname);

@@ -3,6 +3,9 @@
 
 #define MSGBUFF 1024 * 16
 
+extern int mon_log(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *class_tag);
+extern int mon_classify(FEP *fep, PORT *port, char *msgb, uint32_t *class_tag);
+
 void recv_to_fep(void *argv);
 
 void usage(const char *who)
@@ -144,13 +147,16 @@ void recv_to_fep(void *argv)
 
 void main_process(FEP *fep, PORT *port, char *msgb, int msgl)
 {
-    int class_tag = 0;
+    uint32_t class_tag = 0x00;
+
+    if(strcmp(msgb, NOT_RECEIVED) == 0)
+        return;
 
     /* 데이터 분류 태그 */
-    if(-1 == mon_classify(fep, port, &class_tag))
+    if (-1 == mon_classify(fep, port, msgb, &class_tag))
         return;
 
     /* 데이터 로그 남기기 */
-    if(-1 == mon_log())
+    if (-1 == mon_log(fep, port, msgb, msgl, &class_tag))
         return;
 }

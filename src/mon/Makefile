@@ -9,8 +9,8 @@ CFLAGS=-O $(IFLAGS) $(MY_CFLAGS) $(MY_SFLAGS)
 LFLAGS=$(MY_LFLAGS) -L../lib/main -lMAIN 
 AFLAGS=$(MY_AFLAGS)
 
-INCF=../inc/main.h ../inc/context.h ../inc/config.h ../inc/parson.h ../inc/schema.h
-CMD=monrecv
+INCF=../inc/main.h ../inc/context.h ../inc/config.h ../inc/parson.h ../inc/schema.h ../inc/extpkt.h ../inc/oldpkt.h
+CMD=monrecv monfep
 
 
 # Default Rules:
@@ -34,6 +34,8 @@ all: $(CMD)
 
 monrecv: monrecv.o $(INCF)
 	$(CC) -o monrecv monrecv.o $(LFLAGS)
+monfep: monfep.o monlog.o monclass.o $(INCF)
+	$(CC) -o monfep monfep.o monlog.o monclass.o $(LFLAGS)
 
 install: all
 	cp -f $(CMD) $(BIN_DIR)

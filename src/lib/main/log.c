@@ -45,3 +45,16 @@ void fep_log(FEP *fep, int level, const char *caller_function, const char *forma
 
     fclose(logF);
 }
+
+void null_to_space(char *msgb, int msgl)
+{
+    int i;
+
+    for (i = 0; i < msgl; i++)
+    {
+        if (msgb[i] == '\0')
+        {
+            msgb[i] = ' ';
+        }
+    }
+}

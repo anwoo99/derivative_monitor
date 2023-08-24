@@ -191,13 +191,15 @@ void recv_to_send(void *argv)
         slen = sizeof(sockin);
         msgl = recvfrom(port->sock, msgb, sizeof(msgb), 0, (struct sockaddr *)&sockin, &slen);
 
+        null_to_space(msgb, msgl);
+
         if (msgl > 0) // RECEIVED
         {
             /* FOR REAL */
             if (sendto(domain_socket, msgb, strlen(msgb), 0, (struct sockaddr *)&target_addr, sizeof(target_addr)) < 0)
             {
-                fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "%s sendto() error", port->ipc_name);
-                break;
+                //fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "%s sendto() error(1)", port->ipc_name);
+                continue;
             }
 
             /* FOR TEST */
@@ -207,8 +209,8 @@ void recv_to_send(void *argv)
         {
             if (sendto(domain_socket, NOT_RECEIVED, strlen(NOT_RECEIVED), 0, (struct sockaddr *)&target_addr, sizeof(target_addr)) < 0)
             {
-                fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "%s sendto() error", port->ipc_name);
-                break;
+                //fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "%s sendto() error(2)", port->ipc_name);
+                continue;
             }
         }
     }

@@ -15,6 +15,11 @@ typedef struct
     int logLevel;
 } SETTINGS;
 
+typedef struct {
+    int max_date;
+    int depth_log;    
+} RAW_DATA;
+
 typedef struct
 {
     char start[16];
@@ -66,9 +71,6 @@ typedef struct
     int sock;
     struct ip_mreq mreq;
     char ipc_name[64];
-    int domain_socket;
-    struct sockaddr_un target_addr;
-    struct sockaddr_un target_addr_for_test;
     unsigned int recv[24];
     unsigned int lost[24];
     TRAFFIC_TABLE traff[24];
@@ -77,6 +79,7 @@ typedef struct
 typedef struct
 {
     SETTINGS settings;
+    RAW_DATA raw_data;
     PORT ports[MAX_PORT];
     int nport;
 } CONFIG;

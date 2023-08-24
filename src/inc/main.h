@@ -1,7 +1,6 @@
 #ifndef _MAIN_H_
 #define _MAIN_H_
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -48,6 +47,37 @@
 /* Print Function's name for logging */
 #define GET_CALLER_FUNCTION() __func__
 
+/* DATA FORMAT */
+#define OLD_FORMAT 0x000001
+#define EXT_FORMAT 0x000002
+#define HANA_FORMAT 0x000004
+#define NEW_FORMAT 0x000008
+
+/* DATA TYPE */
+#define MASTER 0x000010
+#define TRADE 0x000020
+
+/* MASTER TYPE */
+#define STOCK 0x000040
+#define FUTURE 0x000080
+#define OPTION 0x000100
+#define SPREAD 0x000200
+#define LME 0x000400
+
+/* TRADE TYPE */
+#define STATUS 0x000800
+#define QUOTE 0x001000
+#define CANCEL 0x002000
+#define SETTLE 0x004000
+#define CLOSE 0x008000
+#define OINT 0x010000
+#define DEPTH 0x020000
+#define FND 0x040000
+#define MAVG 0x080000
+#define OFFI 0x100000
+#define WARE 0x200000
+#define VOLM 0x400000
+
 /* Variables */
 typedef struct
 {
@@ -67,6 +97,12 @@ int fep_config(FEP *fep);
 
 /* log.c */
 void fep_log(FEP *fep, int level, const char *caller_function, const char *format, ...);
+
+/* file.c */
+int create_directory(char *dirname);
+
+/* time.c */
+int fep_utc2kst(time_t utc_time, time_t *korean_time, struct tm *korean_tm);
 
 /* shm.c */
 unsigned long djb2(const char *str);

@@ -55,6 +55,7 @@ void parse_config_json(CONFIG *config, JSON_Value *root_value)
     char running[32];
     JSON_Object *root_object;
     JSON_Object *settings_object;
+    JSON_Object *rawdata_object;
     JSON_Array *ports_array;
     size_t ports_count;
     size_t i, j;
@@ -69,8 +70,12 @@ void parse_config_json(CONFIG *config, JSON_Value *root_value)
     snprintf(config->settings.timezone, sizeof(config->settings.timezone), "%s", json_object_get_string(settings_object, "timezone"));
     config->settings.room = (int)json_object_get_number(settings_object, "room");
     snprintf(logLevel, sizeof(logLevel), "%s", json_object_get_string(settings_object, "logLevel"));
-
     config->settings.logLevel = convert_logLevel(logLevel);
+
+    // Parse "raw_data"
+    rawdata_object = json_object_get_object(root_object, "raw_data");
+    config->raw_data.max_date = (int)json_object_get_number(rawdata_object, "max_date");
+    config->raw_data.depth_log = (int)json_object_get_number(rawdata_object, "depth_log");
 
     // Parse "ports"
     ports_array = json_object_get_array(root_object, "ports");

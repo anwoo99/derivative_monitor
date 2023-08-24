@@ -104,6 +104,12 @@ int mon_classify(FEP *fep, PORT *port, char *msgb, uint32_t *class_tag)
 
     strcpy(exchange_name, fep->config.settings.name);
 
+    if(strcmp(msgb, NOT_RECEIVED) == 0)
+    {   
+        *class_tag |= NONE;
+        return(0);
+    }
+
     if (strcmp(exchange_name, "FLME") == 0 || strcmp(exchange_name, "NLME") == 0 || strcmp(exchange_name, "SLME") == 0)
     {
         *class_tag |= LME;

@@ -140,7 +140,7 @@ int mon_log_remove(FEP *fep, char *logdir, int date_limit)
         // If date difference is greater than 5 days, delete the file
         if (date_difference > date_limit)
         {
-            if(remove(logpath) != 0)
+            if (remove(logpath) != 0)
             {
                 fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "Cannot remove '%s' file", logpath);
             }
@@ -165,6 +165,10 @@ int mon_log(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *class_tag)
     int log_mode = FL_DEBUG;
     int max_date = 1;
 
+    /* 데이터 미수신 태그 스킵 */
+    if (*class_tag & NONE)
+        return (0);
+
     /* 호가 로그 필터링 */
     if ((*class_tag & DEPTH) && !raw_data->depth_log)
         return (0);
@@ -187,7 +191,7 @@ int mon_log(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *class_tag)
     }
 
     /* Remove the old logs */
-    if(!(*class_tag & DEPTH))
+    if (!(*class_tag & DEPTH))
         max_date = raw_data->max_date;
 
     if (-1 == mon_log_remove(fep, logdir, max_date))

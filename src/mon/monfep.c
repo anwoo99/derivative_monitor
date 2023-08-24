@@ -149,9 +149,6 @@ void main_process(FEP *fep, PORT *port, char *msgb, int msgl)
 {
     uint32_t class_tag = 0x00;
 
-    if(strcmp(msgb, NOT_RECEIVED) == 0)
-        return;
-
     /* 데이터 분류 태그 */
     if (-1 == mon_classify(fep, port, msgb, &class_tag))
         return;

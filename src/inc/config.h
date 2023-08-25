@@ -58,6 +58,7 @@ typedef struct
 {
     int seqn;
     int running;
+    int alert;
     char name[16];
     char host[16];
     char nic_name[32];
@@ -68,12 +69,18 @@ typedef struct
     int port;
     int intv;
     TIME times[32];
+    int ntime;
     int sock;
     struct ip_mreq mreq;
     char ipc_name[64];
     unsigned int recv[24];
     unsigned int lost[24];
     TRAFFIC_TABLE traff[24];
+    int recv_switch[7][24][60];
+    time_t last_received;
+    int alert_count;
+    int trade_status;
+    int master_status;
 } PORT;
 
 typedef struct

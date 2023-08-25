@@ -30,6 +30,8 @@
 #include "parson.h"
 #include "config.h"
 #include "schema.h"
+#include "oldpkt.h"
+#include "extpkt.h"
 
 /* Logging Flag */
 #define FL_MUST 0
@@ -109,6 +111,7 @@ int create_directory(char *dirname);
 
 /* time.c */
 int fep_utc2kst(time_t utc_time, time_t *korean_time, struct tm *korean_tm);
+void fep_sleep(int microseconds);
 
 /* shm.c */
 unsigned long djb2(const char *str);

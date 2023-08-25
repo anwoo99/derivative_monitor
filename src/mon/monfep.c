@@ -6,6 +6,8 @@
 extern int mon_log(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *class_tag);
 extern int mon_classify(FEP *fep, PORT *port, char *msgb, uint32_t *class_tag);
 
+int main_process(FEP *fep, PORT *port, char *msgb, int msgl);
+
 void recv_to_fep(void *argv);
 
 void usage(const char *who)
@@ -42,6 +44,9 @@ int main(int argc, char *argv[])
 
     for (ii = 0; ii < fep->config.nport; ii++)
     {
+        if (fep->config.ports[ii].running == false)
+            continue;
+
         recvctx[ii].seqn = ii;
         recvctx[ii].fep = fep;
         pthread_create(&recvctx[ii].thread, NULL, recv_to_fep, &recvctx[ii]);
@@ -49,6 +54,9 @@ int main(int argc, char *argv[])
 
     for (ii = 0; ii < fep->config.nport; ii++)
     {
+        if (fep->config.ports[ii].running == false)
+            continue;
+
         pthread_join(recvctx[ii].thread, (void *)&result);
         fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "thread join() (%s:%s) return: %d", fep->config.ports[ii].host, fep->config.ports[ii].name, result);
     }
@@ -137,7 +145,8 @@ void recv_to_fep(void *argv)
         }
         else
         {
-            main_process(fep, port, msgb, msgl);
+            if (-1 == main_process(fep, port, msgb, msgl))
+                break;
         }
     }
 
@@ -145,15 +154,29 @@ void recv_to_fep(void *argv)
     pthread_exit(NULL);
 }
 
-void main_process(FEP *fep, PORT *port, char *msgb, int msgl)
+int main_process(FEP *fep, PORT *port, char *msgb, int msgl)
 {
     uint32_t class_tag = 0x00;
 
     /* 데이터 분류 태그 */
     if (-1 == mon_classify(fep, port, msgb, &class_tag))
-        return;
+        return (0);
+
+    /* 데이터 수신 여부 체크 후 Alert -> NaverWorks */
+    if (-1 == mon_recv_check(fep, port, &class_tag))
+        return (-1);
+
+    /* 데이터 미수신 태그 스킵 */
+    if (class_tag & NONE)
+        return (0);
 
     /* 데이터 로그 남기기 */
     if (-1 == mon_log(fep, port, msgb, msgl, &class_tag))
-        return;
+        return (-1);
+
+    /* 데이터 정합성 검사 & 매핑 => folder */
+    if (-1 == mon_map(fep, port, msgb, msgl, &class_tag))
+        return (-1);
+
+    return (0);
 }

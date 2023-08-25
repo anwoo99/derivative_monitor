@@ -1,6 +1,8 @@
 #include "main.h"
 
 #define DEFAULT_INTV 10
+#define START_MIN 0
+#define END_MIN 59
 
 // Function to convert logLevel string to integer value
 int convert_logLevel(const char *logLevel)
@@ -90,6 +92,7 @@ void parse_config_json(CONFIG *config, JSON_Value *root_value)
 
         port->seqn = i + 1;
         port->running = strcmp(json_object_get_string(port_object, "running"), "ON") == 0 ? true : false;
+        port->alert = strcmp(json_object_get_string(port_object, "alert"), "ON") == 0 ? true : false;
         snprintf(port->name, sizeof(port->name), "%s", json_object_get_string(port_object, "name"));
         snprintf(port->host, sizeof(port->host), "%s", json_object_get_string(port_object, "host"));
         snprintf(port->type, sizeof(port->type), "%s", json_object_get_string(port_object, "type"));
@@ -111,6 +114,8 @@ void parse_config_json(CONFIG *config, JSON_Value *root_value)
         size_t times_count = json_array_get_count(times_array);
         size_t max_times = (times_count > MAX_TIME) ? MAX_TIME : times_count;
 
+        port->ntime = max_times;
+
         for (j = 0; j < max_times; j++)
         {
             JSON_Object *time_object = json_array_get_object(times_array, j);
@@ -127,6 +132,73 @@ void parse_config_json(CONFIG *config, JSON_Value *root_value)
     }
 
     json_value_free(root_value);
+}
+
+int _recv_switch_check(CONFIG *config)
+{
+    int is_check = 0;
+    char wdaystr[7][4] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+    int ii, jj, wday, hour, min;
+    PORT *port;
+    TIME *time;
+    int start_wday, start_hour, start_min;
+    int end_wday, end_hour, end_min;
+
+    for (ii = 0; ii < config->nport; ii++)
+    {
+        port = &config->ports[ii];
+        memset(port->recv_switch, 0x00, sizeof(port->recv_switch));
+
+        for (jj = 0; jj < port->ntime; jj++)
+        {
+            time = &port->times[jj];
+            start_wday = -1;
+            start_hour = -1;
+            start_min = -1;
+            end_wday = -1;
+            end_hour = -1;
+            end_min = -1;
+
+            /* 요일 세팅 */
+            for (wday = 0; wday < 7; wday++)
+            {
+                if (strcmp(wdaystr[wday], time->wday.start) == 0)
+                    start_wday = wday;
+                if (strcmp(wdaystr[wday], time->wday.end) == 0)
+                    end_wday = wday;
+            }
+
+            if (start_wday == -1 || end_wday == -1 || end_wday < start_wday)
+                return (-1);
+
+            for (wday = start_wday; wday <= end_wday; wday++)
+            {
+                start_hour = atoi(time->window.start) / 100;
+                end_hour = atoi(time->window.end) / 100;
+
+                if (start_hour > end_hour)
+                    end_hour += 24;
+
+                for (hour = start_hour; hour <= end_hour; hour++)
+                {
+                    start_min = START_MIN;
+                    end_min = END_MIN;
+
+                    if (hour == start_hour)
+                        start_min = atoi(time->window.start) % 100;
+                    if (hour == end_hour)
+                        end_min = atoi(time->window.end) % 100;
+
+                    for (min = start_min; min <= end_min && min < 60; min++)
+                    {
+                        port->recv_switch[(wday + 1) % 7][(hour > 24) ? (hour - 24) : hour][min] = 1;
+                    }
+                }
+            }
+        }
+    }
+
+    return (0);
 }
 
 int fep_config(FEP *fep)
@@ -146,5 +218,9 @@ int fep_config(FEP *fep)
         return (-1);
 
     parse_config_json(config, rootValue);
+
+    if (-1 == _recv_switch_check(config))
+        return (-1);
+
     return 0;
 }

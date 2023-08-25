@@ -34,8 +34,8 @@ all: $(CMD)
 
 monrecv: monrecv.o $(INCF)
 	$(CC) -o monrecv monrecv.o $(LFLAGS)
-monfep: monfep.o monlog.o monclass.o $(INCF)
-	$(CC) -o monfep monfep.o monlog.o monclass.o $(LFLAGS)
+monfep: monfep.o monlog.o monclass.o moncheck.o monsend.o $(INCF)
+	$(CC) -o monfep monfep.o monlog.o monclass.o moncheck.o monsend.o $(LFLAGS)
 
 install: all
 	cp -f $(CMD) $(BIN_DIR)

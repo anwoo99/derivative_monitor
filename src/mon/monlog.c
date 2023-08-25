@@ -165,10 +165,6 @@ int mon_log(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *class_tag)
     int log_mode = FL_DEBUG;
     int max_date = 1;
 
-    /* 데이터 미수신 태그 스킵 */
-    if (*class_tag & NONE)
-        return (0);
-
     /* 호가 로그 필터링 */
     if ((*class_tag & DEPTH) && !raw_data->depth_log)
         return (0);

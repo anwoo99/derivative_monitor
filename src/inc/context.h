@@ -12,7 +12,16 @@ typedef struct
 
 typedef struct
 {
+    char name[256];
+    char date[9];
+    int is_holiday;
+    int is_alert;
+} HOLIDAY;
+
+typedef struct
+{
     CONFIG config;
+    HOLIDAY holiday;
     int flag;
     int mrec;
     int vrec;

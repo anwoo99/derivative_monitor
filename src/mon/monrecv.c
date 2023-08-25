@@ -43,6 +43,9 @@ int main(int argc, char *argv[])
 
     for (ii = 0; ii < fep->config.nport; ii++)
     {
+        if (fep->config.ports[ii].running == false)
+            continue;
+
         recvctx[ii].seqn = ii;
         recvctx[ii].fep = fep;
         pthread_create(&recvctx[ii].thread, NULL, recv_to_send, &recvctx[ii]);
@@ -50,6 +53,9 @@ int main(int argc, char *argv[])
 
     for (ii = 0; ii < fep->config.nport; ii++)
     {
+        if (fep->config.ports[ii].running == false)
+            continue;
+
         pthread_join(recvctx[ii].thread, (void *)&result);
         fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "thread join() (%s:%s) return: %d", fep->config.ports[ii].host, fep->config.ports[ii].name, result);
     }
@@ -198,7 +204,7 @@ void recv_to_send(void *argv)
             /* FOR REAL */
             if (sendto(domain_socket, msgb, strlen(msgb), 0, (struct sockaddr *)&target_addr, sizeof(target_addr)) < 0)
             {
-                //fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "%s sendto() error(1)", port->ipc_name);
+                // fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "%s sendto() error(1)", port->ipc_name);
                 continue;
             }
 
@@ -209,7 +215,7 @@ void recv_to_send(void *argv)
         {
             if (sendto(domain_socket, NOT_RECEIVED, strlen(NOT_RECEIVED), 0, (struct sockaddr *)&target_addr, sizeof(target_addr)) < 0)
             {
-                //fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "%s sendto() error(2)", port->ipc_name);
+                // fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "%s sendto() error(2)", port->ipc_name);
                 continue;
             }
         }

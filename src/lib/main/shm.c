@@ -39,7 +39,7 @@ int removeSharedMemory(int shmid)
     return shmctl(shmid, IPC_RMID, NULL);
 }
 
-int resizeSharedMemory(int shmid, int newShmsz, void *oldShmad)
+int resizeSharedMemory(int shmid, int newShmsz, void *oldShmad, int copy)
 {
     void *temp_buff = malloc(newShmsz);
     if (!temp_buff)
@@ -60,7 +60,9 @@ int resizeSharedMemory(int shmid, int newShmsz, void *oldShmad)
     }
 
     void *newShmad = attachSharedMemory(newShmid, 0);
-    memcpy(newShmad, temp_buff, newShmsz);
+
+    if (copy)
+        memcpy(newShmad, temp_buff, newShmsz);
 
     free(temp_buff);
     return newShmid;
@@ -73,6 +75,7 @@ int fep_shminit(FEP *fep)
     char *shmad;
     struct shmid_ds shmid_ds;
     MDARCH *arch;
+    int only_room_changed;
 
     shmkey = (int)djb2(fep->exnm);
 
@@ -103,9 +106,16 @@ int fep_shminit(FEP *fep)
             shmad = attachSharedMemory(shmid, 0);
             shmctl(shmid, IPC_STAT, &shmid_ds);
 
+            fep->arch = shmad;
+
             if (shmid_ds.shm_segsz != shmsz) // RESIZE
             {
-                shmid = resizeSharedMemory(shmid, shmsz, shmad);
+                if (abs(fep->config.settings.room - fep->arch->mrec) != abs((int)(shmid_ds.shm_segsz - shmsz) / sizeof(FOLDER)))
+                    only_room_changed = 1;
+                else
+                    only_room_changed = 0;
+
+                shmid = resizeSharedMemory(shmid, shmsz, shmad, only_room_changed);
                 shmad = attachSharedMemory(shmid, 0);
             }
         }
@@ -124,38 +134,37 @@ int fep_shminit(FEP *fep)
     memcpy(&arch->config, &fep->config, sizeof(CONFIG));
 
     fep_log(fep, FL_MUST, GET_CALLER_FUNCTION(),
-                "\n\n--- [%s] Shared Memory Info ---\n"
-                "- Segment Size: %lu bytes\n"
-                "- Last Access Time: %s"
-                "- Last Detach Time: %s"
-                "- Last Change Time: %s"
-                "- Creator Process ID: %d\n"
-                "- Last Process ID: %d\n"
-                "- Number of Attachments: %d\n"
-                "- Key: %d\n"
-                "- UID of Owner: %d\n"
-                "- GID of Owner: %d\n"
-                "- UID of Creator: %d\n"
-                "- GID of Creator: %d\n"
-                "- Permissions: %o\n"
-                "- Sequence Number: %u\n"
-                "-------------------------------\n",
-                fep->exnm,
-                shmid_ds.shm_segsz,
-                ctime(&shmid_ds.shm_atime),
-                ctime(&shmid_ds.shm_dtime),
-                ctime(&shmid_ds.shm_ctime),
-                shmid_ds.shm_cpid,
-                shmid_ds.shm_lpid,
-                shmid_ds.shm_nattch,
-                shmid_ds.shm_perm.__key,
-                shmid_ds.shm_perm.uid,
-                shmid_ds.shm_perm.gid,
-                shmid_ds.shm_perm.cuid,
-                shmid_ds.shm_perm.cgid,
-                shmid_ds.shm_perm.mode,
-                shmid_ds.shm_perm.__seq
-        );
+            "\n\n--- [%s] Shared Memory Info ---\n"
+            "- Segment Size: %lu bytes\n"
+            "- Last Access Time: %s"
+            "- Last Detach Time: %s"
+            "- Last Change Time: %s"
+            "- Creator Process ID: %d\n"
+            "- Last Process ID: %d\n"
+            "- Number of Attachments: %d\n"
+            "- Key: %d\n"
+            "- UID of Owner: %d\n"
+            "- GID of Owner: %d\n"
+            "- UID of Creator: %d\n"
+            "- GID of Creator: %d\n"
+            "- Permissions: %o\n"
+            "- Sequence Number: %u\n"
+            "-------------------------------\n",
+            fep->exnm,
+            shmid_ds.shm_segsz,
+            ctime(&shmid_ds.shm_atime),
+            ctime(&shmid_ds.shm_dtime),
+            ctime(&shmid_ds.shm_ctime),
+            shmid_ds.shm_cpid,
+            shmid_ds.shm_lpid,
+            shmid_ds.shm_nattch,
+            shmid_ds.shm_perm.__key,
+            shmid_ds.shm_perm.uid,
+            shmid_ds.shm_perm.gid,
+            shmid_ds.shm_perm.cuid,
+            shmid_ds.shm_perm.cgid,
+            shmid_ds.shm_perm.mode,
+            shmid_ds.shm_perm.__seq);
 
     return 0;
 }

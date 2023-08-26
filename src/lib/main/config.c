@@ -78,6 +78,7 @@ void parse_config_json(CONFIG *config, JSON_Value *root_value)
     rawdata_object = json_object_get_object(root_object, "raw_data");
     config->raw_data.max_date = (int)json_object_get_number(rawdata_object, "max_date");
     config->raw_data.depth_log = (int)json_object_get_number(rawdata_object, "depth_log");
+    config->raw_data.cross_check = (int)json_object_get_number(rawdata_object, "cross_check");
 
     // Parse "ports"
     ports_array = json_object_get_array(root_object, "ports");

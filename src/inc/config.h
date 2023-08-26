@@ -1,7 +1,6 @@
 #ifndef _CONFIG_H
 #define _CONFIG_H
 
-
 #define MAX_PORT 64
 #define MAX_TIME 10
 
@@ -15,9 +14,11 @@ typedef struct
     int logLevel;
 } SETTINGS;
 
-typedef struct {
+typedef struct
+{
     int max_date;
-    int depth_log;    
+    int depth_log;
+    int cross_check;
 } RAW_DATA;
 
 typedef struct

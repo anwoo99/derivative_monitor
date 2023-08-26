@@ -92,7 +92,7 @@ typedef struct
     MDQUOT oint;         /* Open Interest */
     MDQUOT mavg;         /* LME Month Average */
     MDQUOT offi;         /* LME Official Unofficial Price */
-    MDDEPT dept;         /* Depth */
+    MDDEPT depth;         /* Depth */
 } FOLDER;
 
 #endif

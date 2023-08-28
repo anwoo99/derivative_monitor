@@ -51,7 +51,7 @@ void get_nic_address(char *nic_address, char *nic_name)
 }
 
 // Function to parse JSON string and populate CONFIG structure
-void parse_config_json(CONFIG *config, JSON_Value *root_value)
+int parse_config_json(CONFIG *config, JSON_Value *root_value)
 {
     char logLevel[32];
     char running[32];
@@ -133,6 +133,7 @@ void parse_config_json(CONFIG *config, JSON_Value *root_value)
     }
 
     json_value_free(root_value);
+    return (0);
 }
 
 int _recv_switch_check(CONFIG *config)
@@ -218,7 +219,8 @@ int fep_config(FEP *fep)
     if (!rootValue)
         return (-1);
 
-    parse_config_json(config, rootValue);
+    if (-1 == parse_config_json(config, rootValue))
+        return;
 
     if (-1 == _recv_switch_check(config))
         return (-1);

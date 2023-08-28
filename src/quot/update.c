@@ -26,18 +26,9 @@ static void pushdept(char *name, double val, int color, int push, int seqn);
 static void editprc(char *fldb, double val, int flag);
 
 static char form[16];
-static int xdiv, ydiv, zdiv;
+static int main_f, sub_f, zdiv;
 static double base;
 char s_next[80];
-
-// static int str2int(const char *str, int len)
-// {
-//	char	tmpb[256];
-//
-//	memcpy(tmpb, str, len);
-//	tmpb[len] = '\0';
-//	return(atoi(tmpb));
-//}
 
 //
 // update()
@@ -56,38 +47,32 @@ int update(void *qptr, int what, int push, int seqn)
     {
         FOLDER *fold = qptr;
         MDMSTR *mstr = &fold->mstr;
-        MDQUOT *quot = &fold->quot;
+        MDQUOT *quot = &fold->quote;
 
-        xdiv = fold->mstr.xdiv;
-        ydiv = fold->mstr.ydiv;
+        main_f = fold->mstr.main_f;
+        sub_f = fold->mstr.sub_f;
         zdiv = fold->mstr.zdiv;
+
         sprintf(form, "%%'.%df", mstr->zdiv);
         base = mstr->base;
+        
         pushstr("SYMB", quot->symb, FC_WHITE, push, seqn);
-        pushstr("NAME", mstr->enam, FC_WHITE, push, seqn);
-        pushymd("XYMD", quot->xymd, FC_WHITE, push, seqn);
-        pushhms("XHMS", quot->xhms, FC_WHITE, push, seqn);
+        pushstr("HOST", fold->hostname, FC_WHITE, push, seqn);
         pushchk("OPEN", quot->open, FC_WHITE, push, seqn);
         pushchk("HIGH", quot->high, FC_WHITE, push, seqn);
         pushchk("LOW", quot->low, FC_WHITE, push, seqn);
+        
         if (quot->last != 0.)
             pushchk("LAST", quot->last, FC_WHITE, push, seqn);
         else
             pushchk("LAST", quot->setp, FC_WHITE, push, seqn);
-        pushdif("DIFF", quot->diff, FC_WHITE, push, seqn);
-        pushrat("RATE", quot->rate, FC_WHITE, push, seqn);
+        
         pushlng("TVOL", quot->tvol, FC_WHITE, push, seqn);
-        if (mstr->prev.symd != 0)
-            pushany("SETT", mstr->prev.setp, FC_WHITE, push, seqn);
-        else
-            pushchk("SETT", mstr->prev.setp, FC_WHITE, push, seqn);
-        pushymd("SETD", mstr->prev.symd, FC_WHITE, push, seqn);
-        pushymd("UYMD", mstr->prev.uymd, FC_WHITE, push, seqn);
-        pushhms("UHMS", mstr->prev.uhms, FC_WHITE, push, seqn);
-        pushymd("KYMD", quot->kymd, FC_WHITE, push, seqn);
-        pushhms("KHMS", quot->khms, FC_WHITE, push, seqn);
+        
+        pushksttime("UTIM", quot->update_at, FC_WHITE, push, seqn);
+
         if (!push)
-            rqsymb(mstr->exid, mstr->symb, PUSH_QUOT, seqn);
+            rqsymb(fep->exnm, quot->symb, PUSH_QUOT, seqn);
     }
     break;
     case 200: // price composite
@@ -545,206 +530,6 @@ int update(void *qptr, int what, int push, int seqn)
         pushstr("LOAN", "N/A", FC_WHITE, push, seqn);
     }
     break;
-    case 202: // quote
-    {
-        FOLDER *fold = qptr;
-        MDMSTR *mstr = &fold->mstr;
-        MDQUOT *quot = &fold->quot;
-
-        if (!push)
-            str2fld("oNAME", mstr->enam);
-        if (push != 0 && push != 1)
-            break;
-        xdiv = mstr->xdiv;
-        ydiv = mstr->ydiv;
-        zdiv = mstr->zdiv;
-        sprintf(form, "%%'.%df", mstr->zdiv);
-        base = mstr->base;
-        pushstr("SYMB", quot->symb, FC_WHITE, push, seqn);
-        pushymd("TYMD", quot->tymd, FC_WHITE, push, seqn);
-        pushymd("XYMD", quot->xymd, FC_WHITE, push, seqn);
-        pushhms("XHMS", quot->xhms, FC_WHITE, push, seqn);
-        pushint("SEQN", quot->seqn, FC_WHITE, push, seqn);
-        pushymd("KYMD", quot->kymd, FC_WHITE, push, seqn);
-        pushhms("KHMS", quot->khms, FC_WHITE, push, seqn);
-        pushprc("SETP", quot->setp, FC_WHITE, push, seqn);
-        pushymd("SYMD", quot->symd, FC_WHITE, push, seqn);
-
-        pushprc("BASE", quot->base, FC_WHITE, push, seqn);
-        pushchk("OPEN", quot->open, FC_WHITE, push, seqn);
-        pushchk("HIGH", quot->high, FC_WHITE, push, seqn);
-        pushchk("LOW", quot->low, FC_WHITE, push, seqn);
-        pushchk("LAST", quot->last, FC_WHITE, push, seqn);
-        pushdif("DIFF", quot->diff, FC_WHITE, push, seqn);
-        pushrat("RATE", quot->rate, FC_WHITE, push, seqn);
-        pushint("SIGN", quot->sign, FC_WHITE, push, seqn);
-        pushint("TICK", quot->tick, FC_WHITE, push, seqn);
-        pushchr("DIRF", quot->dirf, FC_WHITE, push, seqn);
-        pushchr("SIDE", quot->side, FC_WHITE, push, seqn);
-        pushint("TSID", quot->tsid, FC_WHITE, push, seqn);
-        pushint("EVOL", quot->evol, FC_WHITE, push, seqn);
-        pushint("TVOL", quot->tvol, FC_WHITE, push, seqn);
-
-        pushint("BVOL", quot->bvol, FC_WHITE, push, seqn);
-        pushint("SVOL", quot->svol, FC_WHITE, push, seqn);
-        pushint("BCNT", quot->bcnt, FC_WHITE, push, seqn);
-        pushint("SCNT", quot->scnt, FC_WHITE, push, seqn);
-        pushhms("OTIM", quot->otim, FC_WHITE, push, seqn);
-        pushhms("HTIM", quot->htim, FC_WHITE, push, seqn);
-        pushhms("LTIM", quot->ltim, FC_WHITE, push, seqn);
-
-        if (!push)
-            rqsymb(mstr->exid, mstr->symb, PUSH_QUOT, seqn);
-    }
-    break;
-    case 203: // market depth
-    {
-        FOLDER *fold = qptr;
-        MDMSTR *mstr;
-        MDDEPT *dept;
-        int ii, jj;
-
-        mstr = &fold->mstr;
-        dept = &fold->dept;
-        base = mstr->base;
-
-        if (!push)
-            str2fld("oNAME", mstr->enam);
-        if (push != 0 && push != 2)
-            break;
-        xdiv = mstr->xdiv;
-        ydiv = mstr->ydiv;
-        zdiv = mstr->zdiv;
-        sprintf(form, "%%'.%df", mstr->zdiv);
-
-        pushint("LEVL", dept->levl[0], FC_WHITE, push, -1);
-        pushint("GBIL", dept->levl[1], FC_WHITE, push, -1);
-        pushymd("TYMD", dept->tymd, FC_WHITE, push, -1);
-        pushymd("XYMD", dept->xymd, FC_WHITE, push, -1);
-        pushhms("XHMS", dept->xhms, FC_WHITE, push, -1);
-        pushymd("KYMD", dept->kymd, FC_WHITE, push, -1);
-        pushhms("KHMS", dept->khms, FC_WHITE, push, -1);
-        for (ii = 0, jj = 9; ii < 11; ii++, jj--)
-        {
-            pushchk("PASK", dept->ask[jj].pask, FC_WHITE, push, ii);
-            if (dept->ask[jj].pask != 0.0)
-                pushint("VASK", dept->ask[jj].vask, FC_WHITE, push, ii);
-            else
-                pushstr("VASK", " ", FC_WHITE, push, ii);
-            if (dept->ask[jj].pask != 0.0 && dept->ask[jj].nask != 0)
-                pushint("NASK", dept->ask[jj].nask, FC_WHITE, push, ii);
-            else
-                pushstr("NASK", " ", FC_WHITE, push, ii);
-            if (dept->ask[jj].pask != 0.0 && dept->ask[jj].cask != 0)
-                pushint("CASK", dept->ask[jj].cask, FC_WHITE, push, ii);
-            else
-                pushstr("CASK", " ", FC_WHITE, push, ii);
-
-            pushchk("PBID", dept->bid[ii].pbid, FC_WHITE, push, ii);
-            if (dept->bid[ii].pbid != 0.0)
-                pushint("VBID", dept->bid[ii].vbid, FC_WHITE, push, ii);
-            else
-                pushstr("VBID", " ", FC_WHITE, push, ii);
-            if (dept->bid[ii].pbid != 0.0 && dept->bid[ii].nbid != 0)
-                pushint("NBID", dept->bid[ii].nbid, FC_WHITE, push, ii);
-            else
-                pushstr("NBID", " ", FC_WHITE, push, ii);
-            if (dept->bid[ii].pbid != 0.0 && dept->bid[ii].cbid != 0)
-                pushint("CBID", dept->bid[ii].cbid, FC_WHITE, push, ii);
-            else
-                pushstr("CBID", " ", FC_WHITE, push, ii);
-        }
-        pushint("T.VBID", dept->vbid, FC_WHITE, push, -1);
-        pushint("T.VASK", dept->vask, FC_WHITE, push, -1);
-        pushint("T.CBID", dept->cbid, FC_WHITE, push, -1);
-        pushint("T.CASK", dept->cask, FC_WHITE, push, -1);
-        pushint("T.NBID", dept->nbid, FC_WHITE, push, -1);
-        pushint("T.NASK", dept->nask, FC_WHITE, push, -1);
-
-        for (ii = 0, jj = 4; ii < 6; ii++, jj--)
-        {
-            pushchk("IPASK", dept->iask[jj].pask, FC_WHITE, push, ii);
-            if (dept->iask[jj].pask != 0.0)
-                pushint("IVASK", dept->iask[jj].vask, FC_WHITE, push, ii);
-            else
-                pushstr("IVASK", " ", FC_WHITE, push, ii);
-            if (dept->iask[jj].pask != 0.0 && dept->iask[jj].nask != 0)
-                pushint("INASK", dept->iask[jj].nask, FC_WHITE, push, ii);
-            else
-                pushstr("INASK", " ", FC_WHITE, push, ii);
-            if (dept->iask[jj].pask != 0.0 && dept->iask[jj].cask != 0)
-                pushint("ICASK", dept->iask[jj].cask, FC_WHITE, push, ii);
-            else
-                pushstr("ICASK", " ", FC_WHITE, push, ii);
-
-            pushchk("IPBID", dept->ibid[ii].pbid, FC_WHITE, push, ii);
-            if (dept->ibid[ii].pbid != 0.0)
-                pushint("IVBID", dept->ibid[ii].vbid, FC_WHITE, push, ii);
-            else
-                pushstr("IVBID", " ", FC_WHITE, push, ii);
-            if (dept->ibid[ii].pbid != 0.0 && dept->ibid[ii].nbid != 0)
-                pushint("INBID", dept->bid[ii].nbid, FC_WHITE, push, ii);
-            else
-                pushstr("INBID", " ", FC_WHITE, push, ii);
-            if (dept->ibid[ii].pbid != 0.0 && dept->ibid[ii].cbid != 0)
-                pushint("ICBID", dept->ibid[ii].cbid, FC_WHITE, push, ii);
-            else
-                pushstr("ICBID", " ", FC_WHITE, push, ii);
-        }
-
-        if (!push)
-            rqsymb(mstr->exid, mstr->symb, PUSH_DEPT, -1);
-    }
-    break;
-    case 204: // time & sales
-    {
-        FOLDER *fold = qptr;
-        MDMSTR *mstr = &fold->mstr;
-        MDQUOT *quot = &fold->quot;
-        MDDEPT *dept = &fold->dept;
-
-        base = mstr->base;
-        if (!push)
-            str2fld("oNAME", mstr->enam);
-        if (push != 0 && push != 1)
-            break;
-        xdiv = mstr->xdiv;
-        ydiv = mstr->ydiv;
-        zdiv = mstr->zdiv;
-        sprintf(form, "%%'.%df", mstr->zdiv);
-
-        if (push && quot->tick)
-        {
-            // insert quote to 1st line
-            insline(5, 1);
-            pushymd("TYMD", quot->tymd, FC_WHITE, 0, 0);
-            if (kst4time)
-            {
-                pushymd("XYMD", quot->kymd, FC_WHITE, 0, 0);
-                pushhms("XHMS", quot->khms, FC_WHITE, 0, 0);
-            }
-            else
-            {
-                pushymd("XYMD", quot->xymd, FC_WHITE, 0, 0);
-                pushhms("XHMS", quot->xhms, FC_WHITE, 0, 0);
-            }
-            pushchk("LAST", quot->last, FC_WHITE, 0, 0);
-            pushdif("DIFF", quot->diff, FC_WHITE, 0, 0);
-            pushrat("RATE", quot->rate, FC_WHITE, 0, 0);
-            pushchk("PBID", dept->bid[0].pbid, FC_WHITE, 0, 0);
-            pushchk("PASK", dept->ask[0].pask, FC_WHITE, 0, 0);
-            pushint("EVOL", quot->evol, FC_WHITE, 0, 0);
-            pushint("TVOL", quot->tvol, FC_WHITE, 0, 0);
-            pushchr("DIRF", quot->dirf, FC_WHITE, 0, 0);
-            pushchr("SIDE", quot->side, FC_WHITE, 0, 0);
-            break;
-        }
-        if (push)
-            break;
-        clreos(5);
-        rqsymb(mstr->exid, mstr->symb, PUSH_QUOT, seqn);
-    }
-    break;
     }
     return (0);
 }
@@ -792,6 +577,19 @@ static void pushhms(char *name, int hms, int color, int push, int seqn)
     sprintf(fldb, HHMMSS, HOUR(hms), MINUTE(hms), SECOND(hms));
     pushstr(name, fldb, color, push, seqn);
 }
+
+static void pushksttime(char *name, time_t time, int color, int push, int seqn)
+{
+    char fldb[256];
+    time_t korean_time;
+    struct tm korean_tm;
+
+
+    fep_utc2kst(time, &korean_time, &korean_tm);
+    ctime_r(&korean_time, fldb);
+    pushstr(name, fldb, color, push, seqn);
+}
+
 static void pushint(char *name, int val, int color, int push, int seqn)
 {
     char fldb[256];
@@ -807,16 +605,6 @@ static void pushlng(char *name, long val, int color, int push, int seqn)
     sprintf(fldb, "%'ld", val);
     pushstr(name, fldb, color, push, seqn);
 }
-
-#if 0
-static void pushdbl(char *name, double val, int color, int push, int seqn)
-{
-	char	fldb[256];
-
-	sprintf(fldb, "%'.f", val);
-	pushstr(name, fldb, color, push, seqn);
-}
-#endif
 
 static void pushprc(char *name, double val, int color, int push, int seqn)
 {

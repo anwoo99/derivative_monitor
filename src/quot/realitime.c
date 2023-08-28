@@ -39,17 +39,20 @@ void rqreset()
 //
 // rqsymb()
 //
-void rqsymb(int exid, char *symb, mask_t mask, int seqn)
+void rqsymb(char *exnm, char *symb, char *hostname, mask_t mask, int seqn)
 {
 	int nn;
 
-	if ((nn = realque.many) >= MAX_SYMB || mask == 0 || strlen(symb) <= 0)
+	if ((nn = realque.many) >= MAX_SYMB || mask == 0 || strlen(symb) <= 0 || strlen(hostname) <= 0)
 		return;
+
 	if (delayed)
 		mask <<= 16;
-	realque.q[nn].exid = exid;
-	sprintf(realque.q[nn].code, "%d@%.15s", exid, symb);
+
+	strcpy(realque.q[nn].exnm, exnm);
+	sprintf(realque.q[nn].code, "%s@%.15s@%s", exnm, symb, hostname);
 	strcpy(realque.q[nn].symb, symb);
+	strcpy(realque.q[nn].hostname, hostname);
 	realque.q[nn].mask = mask;
 	realque.q[nn].seqn = seqn;
 	realque.many++;
@@ -76,6 +79,7 @@ void rqsend()
 	}
 	pushsymb->many = realque.many;
 	pushsymb->push[0].func = RT_RST_SYMB;
+
 	if (pushsymb->many <= 0)
 	{
 		pushsymb->push[0].mask = 0;
@@ -84,6 +88,7 @@ void rqsend()
 	}
 	else
 		stopped = 0;
+		
 	rtd_send(rtd, pushsymb);
 }
 
@@ -135,10 +140,14 @@ static void realpush(struct pushmsg *pushmsg, int scrn)
 			continue;
 		if (fep == NULL)
 			continue;
-		folder = getfolder(fep, realque.q[ii].symb);
+			
+		folder = getfolder(fep, realque.q[ii].symb, realque.q[ii].hostname);
+
 		if (folder == NULL)
 			continue;
+
 		memcpy(&myfold, folder, sizeof(FOLDER));
+
 		if ((pushmsg->mask & PUSH_QUOT) || (pushmsg->mask & (PUSH_QUOT << 16)))
 			update(&myfold, scrn, 1, realque.q[ii].seqn);
 		if ((pushmsg->mask & PUSH_DEPT) || (pushmsg->mask & (PUSH_DEPT << 16)))

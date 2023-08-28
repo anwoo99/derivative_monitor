@@ -46,11 +46,12 @@ extern "C"
         int many;
         struct
         {
-            int exid;
-            char code[40]; // code
-            char symb[32]; // symbol code
-            mask_t mask;   // event mask
-            int seqn;      // sequencial number
+            char exnm[32];
+            char code[40];     // code
+            char symb[32];     // symbol code
+            char hostname[32]; // Host Name
+            mask_t mask;       // event mask
+            int seqn;          // sequencial number
         } q[MAX_SYMB];
     };
 

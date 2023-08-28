@@ -23,7 +23,7 @@ int mapopen(char *scrn)
     int loop;
     int ii, jj, kk;
 
-    sprintf(xmlpath, "%s/fox/%s.cfg", ETC_DIR, scrn);
+    sprintf(xmlpath, "%s/quot/%s.cfg", ETC_DIR, scrn);
     if ((n_conf = getxmlcfg(xmlpath, xmltag)) <= 0)
         return (-1);
 

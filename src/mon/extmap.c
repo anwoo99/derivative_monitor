@@ -34,15 +34,15 @@ int ext_master_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *class_t
 {
     if (*class_tag & FUTURE)
     {
-        ext_future_master_map(fep, port, msgb, msgl, class_tag)
+        ext_future_master_map(fep, port, msgb, msgl, class_tag);
     }
     else if (*class_tag & OPTION)
     {
-        ext_option_master_map(fep, port, msgb, msgl, class_tag)
+        ext_option_master_map(fep, port, msgb, msgl, class_tag);
     }
     else if (*class_tag & SPREAD)
     {
-        ext_spread_master_map(fep, port, msgb, msgl, class_tag)
+        ext_spread_master_map(fep, port, msgb, msgl, class_tag);
     }
 
     return (0);
@@ -52,19 +52,19 @@ int ext_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *class_ta
 {
     if (*class_tag & QUOTE)
     {
-        ext_quote_trade_map(fep, port, msgb, msgl, class_tag)
+        ext_quote_trade_map(fep, port, msgb, msgl, class_tag);
     }
     else if (*class_tag & SETTLE)
     {
-        ext_settle_trade_map(fep, port, msgb, msgl, class_tag)
+        ext_settle_trade_map(fep, port, msgb, msgl, class_tag);
     }
     else if (*class_tag & OINT)
     {
-        ext_oint_trade_map(fep, port, msgb, msgl, class_tag)
+        ext_oint_trade_map(fep, port, msgb, msgl, class_tag);
     }
     else if (*class_tag & DEPTH)
     {
-        ext_depth_trade_map(fep, port, msgb, msgl, class_tag)
+        ext_depth_trade_map(fep, port, msgb, msgl, class_tag);
     }
 
     return (0);
@@ -93,7 +93,7 @@ int ext_future_master_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *
 
     if (folder == NULL)
     {
-        fep_log(fep, FL_ERROR, "Cannot create a new folder for '%s'", master->code);
+        fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "Cannot create a new folder for '%s'", master->code);
         return (-1);
     }
 
@@ -143,7 +143,7 @@ int ext_option_master_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *
 
     if (folder == NULL)
     {
-        fep_log(fep, FL_ERROR, "Cannot create a new folder for '%s'", master->code);
+        fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "Cannot create a new folder for '%s'", master->code);
         return (-1);
     }
 
@@ -166,7 +166,7 @@ int ext_option_master_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *
     mstr->strp = atof(master->strp);
     strcpy(mstr->stcu, master->strc);
     mstr->pinc = atof(master->pinc);
-    mstr->pmul = atof(master->disp);
+    mstr->pmul = atof(master->disf);
     mstr->cvol = atoi(master->cvol);
     mstr->oint = atoi(master->oint);
     strcpy(mstr->ucod, master->ucod);
@@ -199,7 +199,7 @@ int ext_spread_master_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *
 
     if (folder == NULL)
     {
-        fep_log(fep, FL_ERROR, "Cannot create a new folder for '%s'", master->code);
+        fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "Cannot create a new folder for '%s'", master->code);
         return (-1);
     }
 
@@ -220,7 +220,7 @@ int ext_spread_master_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *
     mstr->slmy = atoi(master->slmy);
     mstr->pinc = atof(master->pinc);
     mstr->pmul = atof(master->pmul);
-    strncpy(mstr->legs, &master->fill3[1], 3);
+    strcpy(mstr->legs, master->legs);
 
     mstr->updated_at = time(NULL);
 
@@ -248,7 +248,7 @@ int ext_quote_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *cl
 
     if (folder == NULL)
     {
-        fep_log(fep, FL_ERROR, "Cannot get a folder for '%s'", master->code);
+        fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "Cannot get a folder for '%s'", head->code);
         return (-1);
     }
 
@@ -305,7 +305,7 @@ int ext_settle_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *c
 
     if (folder == NULL)
     {
-        fep_log(fep, FL_ERROR, "Cannot get a folder for '%s'", master->code);
+        fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "Cannot get a folder for '%s'", head->code);
         return (-1);
     }
 
@@ -361,7 +361,7 @@ int ext_oint_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *cla
 
     if (folder == NULL)
     {
-        fep_log(fep, FL_ERROR, "Cannot get a folder for '%s'", master->code);
+        fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "Cannot get a folder for '%s'", head->code);
         return (-1);
     }
 
@@ -376,7 +376,7 @@ int ext_oint_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *cla
     oint->low = atof(trade->lowp);
     oint->date = atoi(trade->date);
 
-    settle->updated_at = current;
+    oint->updated_at = current;
 
     return (0);
 }
@@ -403,7 +403,7 @@ int ext_depth_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *cl
 
     if (folder == NULL)
     {
-        fep_log(fep, FL_ERROR, "Cannot get a folder for '%s'", master->code);
+        fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "Cannot get a folder for '%s'", head->code);
         return (-1);
     }
 

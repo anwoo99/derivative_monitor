@@ -4,7 +4,7 @@
 
 extern int old_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *class_tag);
 extern int ext_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *class_tag);
-extern int int mon_send_cmefnd(FEP *fep, PORT *port, char *message, int send_flag);
+extern int mon_send_cmefnd(FEP *fep, PORT *port, char *message, int send_flag);
 
 /****************************/
 /* mon_map()                */
@@ -17,7 +17,7 @@ int mon_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *class_tag)
     {
         old_map(fep, port, msgb, msgl, class_tag);
     }
-    else if(*class_tag & EXT_FORMAT)
+    else if (*class_tag & EXT_FORMAT)
     {
         ext_map(fep, port, msgb, msgl, class_tag);
     }
@@ -33,7 +33,7 @@ int empty_alert(FEP *fep, PORT *port, char *msgb, char *field_buffer, char *fiel
 {
     char message[1024];
 
-    if (strlen(field) <= 0)
+    if (strlen(field_buffer) <= 0)
     {
         sprintf(message, "'%s' field empty..! | [%s]", field_name, msgb);
         mon_send_cmefnd(fep, port, message, send_flag);
@@ -152,39 +152,39 @@ int cross_check(FEP *fep, PORT *port, MDDEPT *depth, int send_flag)
 
     for (ii = 0; ii < DEPTH_LEVEL; ii++)
     {
-        if (((ask[ii] - ask[ii + 1]) >= 0.) && (fabsf(ask[ii] - 1.) != 1.) && (fabsf(ask[ii + 1] - 1.) != 1.))
+        if (((ask[ii].price - ask[ii + 1].price) >= 0.) && (fabsf(ask[ii].price - 1.) != 1.) && (fabsf(ask[ii + 1].price - 1.) != 1.))
         {
-            sprintf(message, "[%s] 매도 [%d|%f] <=> [%d|%f]", depth->symb, ii, ask[ii], ii + 1, ask[ii + 1]);
+            sprintf(message, "[%s] 매도 [%d|%f] <=> [%d|%f]", depth->symb, ii, ask[ii].price, ii + 1, ask[ii + 1].price);
             mon_send_cmefnd(fep, port, message, 0);
             is_crossed = 1;
         }
 
-        if (((bid[ii + 1] - bid[ii]) >= 0.) && (fabsf(bid[ii] - 1.) != 1.) && (fabsf(bid[ii + 1] - 1.) != 1.))
+        if (((bid[ii + 1].price - bid[ii].price) >= 0.) && (fabsf(bid[ii].price - 1.) != 1.) && (fabsf(bid[ii + 1].price - 1.) != 1.))
         {
-            sprintf(message, "[%s] 매수 [%d|%f] <=> [%d|%f]", depth->symb, ii, bid[ii], ii + 1, bid[ii + 1]);
+            sprintf(message, "[%s] 매수 [%d|%f] <=> [%d|%f]", depth->symb, ii, bid[ii].price, ii + 1, bid[ii + 1].price);
             mon_send_cmefnd(fep, port, message, 0);
             is_crossed = 1;
         }
     }
 
-    if ((bid[0] - ask[0]) >= 0. && (fabsf(bid[0] - 0.) != 0.) && (fabsf(ask[0] - 0.) != 0.))
+    if ((bid[0].price - ask[0].price) >= 0. && (fabsf(bid[0].price - 0.) != 0.) && (fabsf(ask[0].price - 0.) != 0.))
     {
-        sprintf(message, "[%s] 매수 1호가[%f] <=> 매도 1호가[%f]", depth->symb, bid[0], ask[0]);
+        sprintf(message, "[%s] 매수 1호가[%f] <=> 매도 1호가[%f]", depth->symb, bid[0].price, ask[0].price);
         mon_send_cmefnd(fep, port, message, 0);
         is_crossed = 1;
     }
 
-    if(is_crossed)
+    if (is_crossed)
     {
         depth->cross_cnt++;
 
-        if(depth->cross_cnt > MAX_CROSS_ERROR)
+        if (depth->cross_cnt > MAX_CROSS_ERROR)
         {
             sprintf(message, "[%s] 품목에서 호가역전이 과도하게 발생하고 있습니다.", depth->symb);
             mon_send_cmefnd(fep, port, message, send_flag);
             depth->cross_cnt = 0;
         }
-    }   
+    }
 }
 
 int parse_pind(MDMSTR *mstr, char *pind)
@@ -194,74 +194,75 @@ int parse_pind(MDMSTR *mstr, char *pind)
     switch (pind[0])
     {
     case 'A':
-        master->main_f = 2;
-        master->sub_f = 1;
-        master->zdiv = 1;
+        mstr->main_f = 2;
+        mstr->sub_f = 1;
+        mstr->zdiv = 1;
         break;
     case 'B':
-        master->main_f = 4;
-        master->sub_f = 1;
-        master->zdiv = 2;
+        mstr->main_f = 4;
+        mstr->sub_f = 1;
+        mstr->zdiv = 2;
         break;
     case 'C':
-        master->main_f = 8;
-        master->sub_f = 1;
-        master->zdiv = 3;
+        mstr->main_f = 8;
+        mstr->sub_f = 1;
+        mstr->zdiv = 3;
         break;
     case 'D':
-        master->main_f = 16;
-        master->sub_f = 1;
-        master->zdiv = 4;
+        mstr->main_f = 16;
+        mstr->sub_f = 1;
+        mstr->zdiv = 4;
         break;
     case 'E':
-        master->main_f = 32;
-        master->sub_f = 1;
-        master->zdiv = 5;
+        mstr->main_f = 32;
+        mstr->sub_f = 1;
+        mstr->zdiv = 5;
         break;
     case 'F':
-        master->main_f = 64;
-        master->sub_f = 1;
-        master->zdiv = 6;
+        mstr->main_f = 64;
+        mstr->sub_f = 1;
+        mstr->zdiv = 6;
         break;
     case 'G':
-        master->main_f = 128;
-        master->sub_f = 1;
-        master->zdiv = 7;
+        mstr->main_f = 128;
+        mstr->sub_f = 1;
+        mstr->zdiv = 7;
         break;
     case 'H':
-        master->main_f = 256;
-        master->sub_f = 1;
-        master->zdiv = 8;
+        mstr->main_f = 256;
+        mstr->sub_f = 1;
+        mstr->zdiv = 8;
         break;
     case 'I':
-        master->main_f = 32;
-        master->sub_f = 2;
-        master->zdiv = 6;
+        mstr->main_f = 32;
+        mstr->sub_f = 2;
+        mstr->zdiv = 6;
         break;
     case 'J':
-        master->main_f = 64;
-        master->sub_f = 2;
-        master->zdiv = 7;
+        mstr->main_f = 64;
+        mstr->sub_f = 2;
+        mstr->zdiv = 7;
         break;
     case 'K':
-        master->main_f = 32;
-        master->sub_f = 4;
-        master->zdiv = 7;
+        mstr->main_f = 32;
+        mstr->sub_f = 4;
+        mstr->zdiv = 7;
         break;
     case 'L':
-        master->main_f = 32;
-        master->sub_f = 8;
-        master->zdiv = 8;
+        mstr->main_f = 32;
+        mstr->sub_f = 8;
+        mstr->zdiv = 8;
         break;
     default:
         number = atoi(pind);
 
         if (number >= 0 && number <= 9)
         {
-            master->main_f = pow(10, number);
-            master->sub_f = 1;
-            master->zdiv = number;
+            mstr->main_f = pow(10, number);
+            mstr->sub_f = 1;
+            mstr->zdiv = number;
         }
+
         break;
     }
 

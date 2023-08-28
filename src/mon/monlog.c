@@ -49,7 +49,7 @@ int mon_log_path(FEP *fep, PORT *port, uint32_t *class_tag, char *logdir, char *
     /* Create Directory */
     if (-1 == create_directory(logdir))
     {
-        fep_log(fep, FL_ERROR, "Cannot create direcotry '%s'", logdir);
+        fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "Cannot create direcotry '%s'", logdir);
         return (-1);
     }
     return (0);

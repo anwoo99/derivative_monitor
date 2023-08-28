@@ -107,10 +107,11 @@ int fep_shminit(FEP *fep)
             shmctl(shmid, IPC_STAT, &shmid_ds);
 
             fep->arch = shmad;
+            arch = (MDARCH *)fep->arch;
 
             if (shmid_ds.shm_segsz != shmsz) // RESIZE
             {
-                if (abs(fep->config.settings.room - fep->arch->mrec) != abs((int)(shmid_ds.shm_segsz - shmsz) / sizeof(FOLDER)))
+                if (abs(fep->config.settings.room - arch->mrec) != abs((int)(shmid_ds.shm_segsz - shmsz) / sizeof(FOLDER)))
                     only_room_changed = 1;
                 else
                     only_room_changed = 0;

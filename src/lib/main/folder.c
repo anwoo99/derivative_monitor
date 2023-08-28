@@ -48,7 +48,7 @@ FOLDER *newfolder(FEP *fep, const char *symb, const char *hostname)
     }
     if (mdarch->vrec >= mdarch->mrec)
     {
-        fep_log(fep, FL_ERROR, "The shared memory for quote is full %d/%d", mdarch->vrec, mdarch->mrec);
+        fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "The shared memory for quote is full %d/%d", mdarch->vrec, mdarch->mrec);
         return (NULL);
     }
 
@@ -90,7 +90,7 @@ void delfolder(FEP *fep, FOLDER *folder)
 
     first = (char *)&folder[0];
     second = (char *)&folder[1];
-    seqn = (int)(((unsigned long)folder - (unsigned log)fep->fold) / sizeof(FOLDER));
+    seqn = (int)(((unsigned long)folder - (unsigned long)fep->fold) / sizeof(FOLDER));
     size = (mdarch->vrec - seqn - 1) * sizeof(FOLDER);
 
     memmove(first, second, size);

@@ -27,6 +27,9 @@
 #include <stdbool.h>
 #include <ifaddrs.h>
 #include <dirent.h>
+#include <netinet/tcp.h>
+#include <math.h>
+
 #include "parson.h"
 #include "config.h"
 #include "schema.h"
@@ -119,5 +122,10 @@ int fep_shminit(FEP *fep);
 
 /* close.c */
 void fep_close(FEP *fep);
+
+/* folder.c */
+FOLDER *getfolder(FEP *fep, const char *symb, const char *hostname);
+FOLDER *newfolder(FEP *fep, const char *symb, const char *hostname);
+void delfolder(FEP *fep, FOLDER *folder);
 
 #endif

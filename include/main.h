@@ -27,9 +27,12 @@
 #include <stdbool.h>
 #include <ifaddrs.h>
 #include <dirent.h>
+#include <netinet/tcp.h>
 #include "parson.h"
 #include "config.h"
 #include "schema.h"
+#include "oldpkt.h"
+#include "extpkt.h"
 
 /* Logging Flag */
 #define FL_MUST 0
@@ -49,38 +52,39 @@
 #define GET_CALLER_FUNCTION() __func__
 
 /* DATA FORMAT */
-#define OLD_FORMAT 0x000001
-#define EXT_FORMAT 0x000002
-#define HANA_FORMAT 0x000004
-#define NEW_FORMAT 0x000008
+#define OLD_FORMAT 0x0000001
+#define EXT_FORMAT 0x0000002
+#define HANA_FORMAT 0x0000004
+#define NEW_FORMAT 0x0000008
 
 /* DATA TYPE */
-#define MASTER 0x000010
-#define TRADE 0x000020
+#define MASTER 0x0000010
+#define TRADE 0x0000020
 
 /* MASTER TYPE */
-#define STOCK 0x000040
-#define FUTURE 0x000080
-#define OPTION 0x000100
-#define SPREAD 0x000200
-#define WAREHOUSE 0x000400
+#define STOCK 0x0000040
+#define FUTURE 0x0000080
+#define OPTION 0x0000100
+#define SPREAD 0x0000200
+#define WAREHOUSE 0x0000400
 
 /* TRADE TYPE */
-#define STATUS 0x000800
-#define QUOTE 0x001000
-#define CANCEL 0x002000
-#define SETTLE 0x004000
-#define CLOSE 0x008000
-#define OINT 0x010000
-#define DEPTH 0x020000
-#define FND 0x040000
-#define MAVG 0x080000
-#define OFFI 0x100000
-#define WARE 0x200000
-#define VOLM 0x400000
+#define STATUS 0x0000800
+#define QUOTE 0x0001000
+#define CANCEL 0x0002000
+#define SETTLE 0x0004000
+#define CLOSE 0x0008000
+#define OINT 0x0010000
+#define DEPTH 0x0020000
+#define FND 0x0040000
+#define MAVG 0x0080000
+#define OFFI 0x0100000
+#define WARE 0x0200000
+#define VOLM 0x0400000
 
 /* EXCHANGE */
-#define LME 0x800000
+#define LME 0x0800000
+#define NONE 0x1000000
 
 /* Variables */
 typedef struct
@@ -108,6 +112,7 @@ int create_directory(char *dirname);
 
 /* time.c */
 int fep_utc2kst(time_t utc_time, time_t *korean_time, struct tm *korean_tm);
+void fep_sleep(int microseconds);
 
 /* shm.c */
 unsigned long djb2(const char *str);
@@ -115,5 +120,10 @@ int fep_shminit(FEP *fep);
 
 /* close.c */
 void fep_close(FEP *fep);
+
+/* folder.c */
+FOLDER *getfolder(FEP *fep, const char *symb, const char *hostname);
+FOLDER *newfolder(FEP *fep, const char *symb, const char *hostname);
+void delfolder(FEP *fep, FOLDER *folder);
 
 #endif

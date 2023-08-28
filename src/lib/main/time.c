@@ -40,11 +40,11 @@ int fep_holiday(FEP *fep, time_t *current, struct tm *current_tm)
 
     memset(holiday->date, 0x00, sizeof(holiday->date));
     strcpy(holiday->date, current_date);
-    sprintf(filename, "%s/holidays/%s-%d.txt", ETC_DIR, &fep->exnm[1], current_tm->wday);
+    sprintf(filename, "%s/holidays/%s-%d.txt", ETC_DIR, &fep->exnm[1], current_tm->tm_wday);
 
     if (access(filename, F_OK) == -1)
     {
-        fep_log(fep, FL_ERROR, "There is no '%s' file", filename);
+        fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "There is no '%s' file", filename);
         _false_holiday(holiday);
         return (-1);
     }
@@ -53,7 +53,7 @@ int fep_holiday(FEP *fep, time_t *current, struct tm *current_tm)
 
     if (fp <= 0)
     {
-        fep_log(fep, FL_ERROR, "Cannot open '%s' file", filename);
+        fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "Cannot open '%s' file", filename);
         _false_holiday(holiday);
         return (-1);
     }

@@ -21,7 +21,6 @@ typedef struct
     char legs[8];        /* Leg Side */
     char isin[32];       /* ISIN Code */
     char sedo[32];       /* Sedol Code */
-    char styp[128];      /* Instrument Type */
     char ucod[SYMB_LEN]; /* Underlying Code */
     double pinc;         /* Price Increment */
     double pmul;         /* Price Multiplier */

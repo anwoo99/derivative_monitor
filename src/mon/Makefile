@@ -6,7 +6,7 @@ INC=$(INC_DIR)
 LD=ld
 IFLAGS=-I../inc -I../../inc
 CFLAGS=-O $(IFLAGS) $(MY_CFLAGS) $(MY_SFLAGS)
-LFLAGS=$(MY_LFLAGS) -L../lib/main -lMAIN 
+LFLAGS=$(MY_LFLAGS) -L../lib/main -lMAIN -lm 
 AFLAGS=$(MY_AFLAGS)
 
 INCF=../inc/main.h ../inc/context.h ../inc/config.h ../inc/parson.h ../inc/schema.h ../inc/extpkt.h ../inc/oldpkt.h

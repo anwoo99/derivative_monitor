@@ -1,4 +1,4 @@
-#include "main.h"
+#include "context.h"
 
 #define MAX_ALERT 3
 #define _DEFAULT_RECEIVE_FLAG 0
@@ -16,29 +16,29 @@ int tcp_socket_configuration(FEP *fep)
     tsock = socket(PF_INET, SOCK_STREAM, 0);
 
     if (tsock < 0)
-        fep_log(fep, FL_ERROR, "socket() error");
+        fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "socket() error");
 
     if (-1 == setsockopt(tsock, SOL_SOCKET, SO_KEEPALIVE, &keepalive, sizeof(keepalive)))
     {
-        fep_log(fep, FL_ERROR, "setsockopt() keepalive error");
+        fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "setsockopt() keepalive error");
         close(tsock);
         return (-1);
     }
     if (-1 == setsockopt(tsock, SOL_TCP, TCP_KEEPIDLE, &keepidle, sizeof(keepidle)))
     {
-        fep_log(fep, FL_ERROR, "setsockopt() keepidle error");
+        fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "setsockopt() keepidle error");
         close(tsock);
         return (-1);
     }
     if (-1 == setsockopt(tsock, SOL_TCP, TCP_KEEPCNT, &keepcnt, sizeof(keepcnt)))
     {
-        fep_log(fep, FL_ERROR, "setsockopt() keepcnt error ");
+        fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "setsockopt() keepcnt error ");
         close(tsock);
         return (-1);
     }
     if (-1 == setsockopt(tsock, SOL_TCP, TCP_KEEPINTVL, &keepintv, sizeof(keepintv)))
     {
-        fep_log(fep, FL_ERROR, "setsockopt() keepintv error");
+        fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "setsockopt() keepintv error");
         close(tsock);
         return (-1);
     }
@@ -83,7 +83,7 @@ int _not_received(FEP *fep, PORT *port, uint32_t *class_tag, time_t *current, st
             port->trade_status = _NOT_RECEIVE_FLAG;
             max_alert = MAX_ALERT;
             diff = difftime(*current, port->last_received);
-            sprintf(message, "데이터가 %ld초 동안 수신되지 않습니다.", diff);
+            sprintf(message, "데이터가 %.3f초 동안 수신되지 않습니다.", diff);
         }
 
         if (port->alert_count < max_alert)
@@ -159,7 +159,7 @@ int mon_recv_check(FEP *fep, PORT *port, uint32_t *class_tag)
 
     if (localtime_r(&current, &current_tm) == NULL)
     {
-        fep_log(fep, FL_ERROR, "Cannot get the current time for '%s'", fep->exnm);
+        fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "Cannot get the current time for '%s'", fep->exnm);
         return (-1);
     }
 
@@ -172,7 +172,7 @@ int mon_recv_check(FEP *fep, PORT *port, uint32_t *class_tag)
         if (holiday->is_alert == 0)
         {
             holiday->is_alert = 1;
-            fep_log(fep, FL_MUST, "금일 '%s' 거래소 휴장일 입니다(%s)", fep->exnm, holiday->name)
+            fep_log(fep, FL_MUST, GET_CALLER_FUNCTION(), "금일 '%s' 거래소 휴장일 입니다(%s)", fep->exnm, holiday->name);
         }
         return (0);
     }

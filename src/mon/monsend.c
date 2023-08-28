@@ -1,6 +1,6 @@
 #include "main.h"
 
-#define DELIM = "\001"
+#define DELIM "\001"
 #define MARKET_ALERT_TOKEN "1"
 
 #define CMEFND_IP "49.247.7.123"
@@ -19,7 +19,7 @@ int mon_send_cmefnd(FEP *fep, PORT *port, char *message, int send_flag)
     sprintf(msgb, "[%s] [%s-%s] %s", port->host, fep->exnm, port->name, message);
     sprintf(encoded_data, "%s%s=%s%s", DELIM, MARKET_ALERT_TOKEN, msgb, DELIM);
 
-    fep_log(fep, FL_PROGRESS, "%s", msgb);
+    fep_log(fep, FL_PROGRESS, GET_CALLER_FUNCTION(), "%s", msgb);
 
     if (!send_flag)
         return (0);
@@ -35,7 +35,7 @@ int mon_send_cmefnd(FEP *fep, PORT *port, char *message, int send_flag)
 
     if (connect(tcp_socket, (struct sockaddr *)&cmefnd, sizeof(cmefnd)) == -1)
     {
-        fep_log(fep, FL_ERROR, "Cannot connect to CMEFND Server");
+        fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "Cannot connect to CMEFND Server");
         return (0);
     }
 
@@ -52,7 +52,7 @@ int mon_send_cmefnd(FEP *fep, PORT *port, char *message, int send_flag)
             }
             else
             {
-                fep_log(fep, FL_ERROR, "Failed to write() data");
+                fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "Failed to write() data");
                 close(tcp_socket);
                 return (0);
             }

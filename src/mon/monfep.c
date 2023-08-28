@@ -102,7 +102,7 @@ int domain_socket_configuration(FEP *fep, PORT *port)
     if ((bind(domain_socket, (struct sockaddr *)&target_addr, sizeof(target_addr))) == -1)
     {
         close(domain_socket);
-        fep_log(fep, FL_ERROR, "Failed to bind() to '%s' domain socket", port->ipc_name);
+        fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "Failed to bind() to '%s' domain socket", port->ipc_name);
         return (-1);
     }
 

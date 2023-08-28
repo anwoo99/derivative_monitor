@@ -69,7 +69,7 @@ extern "C"
 
     int rqinit();
     void rqreset();
-    void rqsymb(int, char *, mask_t, int);
+    void rqsymb(char *, char *, char *, mask_t, int);
     void rqsend();
 
     void clearall();

@@ -1,7 +1,8 @@
-#include "quot.h"
-
-/* 표준 출력에다 문자 쓰기 */
-#define flush(x) write(1, x, strlen(x));
+#include "pen.h"
+#include <term.h>
+#include <termios.h>
+#include <sys/ioctl.h>
+#include <curses.h>
 
 #define flush(x) write(1, x, strlen(x));
 
@@ -49,42 +50,22 @@ static pthread_mutex_t lock;
 static void *cleaner();
 static void redraw(int);
 
-/******************************************************************************************/
-// 함수 설명
-// 1. int tcgetattr(int fd, struct termios *termios_p);
-//   - 터미널 속성 가져오는 함수
-//   - fd=0 : 표준입력터미널
 //
-// 2. int tcsetattr(int fildes, int optional_actions, struct termios *termios_p);
-//   - 터미널 파일에 대한 속성을 설정한다.
-//   - TCSNOW : 속성을 바로 변경한다
+// openterm()
 //
-// 3. WINDOW *initscr(void);
-//   - ncurses 라이브러리를 초기화하고 터미널 창 내에서 화면을 조작할 수 있도록 준비한다.
-/******************************************************************************************/
-
 int openterm()
 {
-    /* 표준 입력 터미널 속성 가져오기*/
     tcgetattr(0, &termio4o);
     tcgetattr(0, &termio4n);
-
-    /* 사용자가 키보드로 입력한 문자가 화면에 출력(ECHO)되지 않도록 세팅 */
     termio4n.c_lflag &= ~ECHO;
-
-    /* 터미널을 Non-Canonical 모드로 변경 */
-    /* Non-Canonical: 사용자가 키를 입력할 때마다 바로 프로그램으로 입력이 전달됨(엔터 없이).*/
     termio4n.c_lflag &= ~ICANON;
-
-    /* VMIN: 'c_cc' 배열의 인덱스이며, c_cc[VMIN]은 Non-Canonical 모드에서 읽을 데이터의 최소 길이를 나타냄 */
-    /* c_cc[VMIN] = 1인 경우, 한 개의 문자를 입력할 때마다 읽기 작업이 수행됨 */
     termio4n.c_cc[VMIN] = 1;
-
-    /* termio4n에 저장해 놓은 설정들을 즉시 표준입력터미널에 저장한다. */
     tcsetattr(0, TCSANOW, &termio4n);
 
-    /* ncruses 라이브러리 초기화 */
     initscr();
+    MAX_ROW = lines;
+    MAX_COL = columns;
+    MAX_SIZ = lines * columns;
 
     m_fldmap = DEF_ROW * 16;
     n_fldmap = 0;
@@ -96,35 +77,24 @@ int openterm()
 
     s_fldmap = (struct fldmap *)malloc(sizeof(struct fldmap) * m_fldmap);
 
-    /* 문자 꾸밈 초기화 */
     setattr(0);
-
-    /* 스크린 초기화 */
     clrscrn(1);
-
-    /* 마우스 커서 트래킹 모드 활성화 => 터미널에서 마우스의 움직임과 버튼 클릭 이벤트를 읽을 수 있음 */
-    write(1, "\033[?9h", 5);
-
-    /* 인터럽트 시그널 발생 시 closeterm() 함수 실행 */
+    write(1, "\033[?9h", 5); // mouse tracking
     signal(SIGINT, closeterm);
-
-    /* 사용자가 터미널 사이즈 변경 시 스크린 재작성 */
     signal(SIGWINCH, redraw);
-
-    /* 커서 안보이게 설정 */
     cursor(0);
 
     pthread_mutex_init(&lock, NULL);
     return (0);
 }
 
-void closeterm()
+void closeterm(int argn)
 {
-    cursor(1);                        // 커서 보이게
-    setattr(0);                       // 문자 꾸밈 초기화
-    write(1, "\033[?9l", 5);          // 터미널에서 벨 소리를 발생하지 않도록 설정
-    clrscrn(1);                       // 스크린 초기화
-    tcsetattr(0, TCSANOW, &termio4o); // 프로그램 시작 전 터미널 상태(termio4o)로 즉시 원복
+    cursor(1);
+    setattr(0);
+    write(1, "\033[?9l", 5);
+    clrscrn(1);
+    tcsetattr(0, TCSANOW, &termio4o);
     exit(0);
 }
 
@@ -284,7 +254,6 @@ void putfld(struct field *field, int force)
     }
     pthread_mutex_unlock(&lock);
 }
-
 //
 // endfld()
 //
@@ -599,13 +568,17 @@ int fldattr(char *name)
     return (fldmap->att);
 }
 
+//
+// clrscrn()
+// Clear screen
+//
 void clrscrn(int line)
 {
     int size;
 
     switch (line)
     {
-    case 0: // 전체 터미널 클리어 및 커서가 최상단 왼쪽으로 이동(= "\033[H\033[2J")
+    case 0:
         sprintf(escbuf, "\033[H\033[2J");
         memset(scrn_char, ' ', DEF_SIZ);
         memset(scrn_xref, 0, DEF_SIZ * sizeof(scrn_xref[0]));
@@ -613,7 +586,7 @@ void clrscrn(int line)
         memset(scrn_type, 0, DEF_SIZ);
         cursaddr = 0;
         break;
-    default: // 커서를 'line' 변수가 가리키는 특정 라인으로 이동 후 해당 커서부터 마지막 까지의 터미널 클리어
+    default: // clear screen presentation for quotes
         sprintf(escbuf, "\033[%d;0H\033[J", line);
         cursaddr = POS(line, 1);
         size = DEF_SIZ - cursaddr;
@@ -623,7 +596,6 @@ void clrscrn(int line)
         memset(&scrn_xpos[cursaddr], 0, size * sizeof(scrn_xpos[0]));
         break;
     }
-
     flush(escbuf);
 }
 
@@ -760,41 +732,16 @@ void setpos(int row, int col)
 
     if (POS(row, col) == cursaddr && COL(cursaddr) != 1)
         return;
+
     r = ROW(cursaddr);
     c = COL(cursaddr);
+
     if (cursaddr < 0)
     {
         r = 0;
         c = 0;
     }
 
-#if 0
-	if (col == 1 && row == r+1 && c != 1)
-		sprintf(escbuf, "\r\n");	
-	else  if (r == row && c != 1)
-	{
-		d = col - c;
-		if (d > 0)
-			sprintf(escbuf, "\033[%dC", d);
-		else 
-		{
-			d = -d;
-			sprintf(escbuf, "\033[%dD", d);
-		}
-	}
-	else if (c == col && c != 1)
-	{
-		d = row - r;
-		if (d > 0)
-			sprintf(escbuf, "\033[%dB", d);
-		else 
-		{
-			d = -d;
-			sprintf(escbuf, "\033[%dA", d);
-		}
-	}
-	else
-#endif
     if (row <= MAX_ROW && col <= MAX_COL)
     {
         sprintf(escbuf, "\033[%d;%dH", row, col);
@@ -833,19 +780,23 @@ void setfocus(int row, int col)
     pthread_mutex_unlock(&lock);
 }
 
-/* 터미널 상에서 커서를 보이게 할지 말지를 설정하는 함수 */
+//
+// visible/invisible cursor
+//
 void cursor(int onoff)
 {
+    static int visible = 1;
+
     switch (onoff)
     {
-    case 0: // 터미널에서 커서를 보이지 않게 함("\033[?25l")
+    case 0:
         if (!visible)
             break;
         visible = 0;
         sprintf(escbuf, "\033[?25l");
         flush(escbuf);
         break;
-    default: // 터미널에서 커서를 보이게 함("\033[?25h")
+    default:
         if (visible)
             break;
         visible = 1;
@@ -854,7 +805,6 @@ void cursor(int onoff)
         break;
     }
 }
-
 //
 // savepos()
 void savepos()
@@ -872,70 +822,64 @@ void restorepos()
     flush(escbuf);
 }
 
-/* setattr(): 문자 꾸미기 */
-/*  - attr: 문자를 어떻게 꾸밀지에 대한 flag */
-/*    attr = 0000 | 0000 | 0000 | 0000 */
-/*    attr = <None> | <색상설정> | <None> | <색상특징> */
-/*    색상 설정 = Black, Red 등 */
-/*    색상 특징 = 반짝임, 밑줄, 볼드처리 등 */
-void setattr(int attr)
+//
+// setattr
+// Set attribute
+//
+void setattr(attr)
 {
     int setcha[32];
     int esclen, setlen;
-    int ii;
+    int diff, ii;
 
+#if 1
     attr &= 0x0fff;
-
-    /* 마지막으로 세팅된 속성과 같으면 스킵 */
+#endif
     if (attr == attribute)
         return;
 
     setlen = 0;
-
     if (attr & FA_BOLD)
-        setcha[setlen++] = ANSI_FORMAT_BOLD;
+        setcha[setlen++] = 1;
     if (attr & FA_UNDERLINE)
-        setcha[setlen++] = ANSI_FORMAT_UNDERLINE;
+        setcha[setlen++] = 4;
     if (attr & FA_REVERSE)
-        setcha[setlen++] = ANSI_FORMAT_REVERSE;
+        setcha[setlen++] = 7;
     if (attr & FA_BLINK)
-        setcha[setlen++] = ANSI_FORMAT_BLINK;
-
+        setcha[setlen++] = 5;
     switch (COLOR_F(attr))
     {
     case C_BLACK:
-        setcha[setlen++] = ANSI_COLOR_BLACK;
+        setcha[setlen++] = 30;
         break;
     case C_RED:
-        setcha[setlen++] = ANSI_COLOR_RED;
+        setcha[setlen++] = 31;
         break;
     case C_GREEN:
-        setcha[setlen++] = ANSI_COLOR_GREEN;
+        setcha[setlen++] = 32;
         break;
     case C_YELLOW:
-        setcha[setlen++] = ANSI_COLOR_YELLOW;
+        setcha[setlen++] = 33;
         break;
     case C_BLUE:
-        setcha[setlen++] = ANSI_COLOR_BLUE;
+        setcha[setlen++] = 34;
         break;
     case C_MAGENTA:
-        setcha[setlen++] = ANSI_COLOR_MAGENTA;
+        setcha[setlen++] = 35;
         break;
     case C_CYAN:
-        setcha[setlen++] = ANSI_COLOR_CYAN;
+        setcha[setlen++] = 36;
         break;
     case C_WHITE:
-        setcha[setlen++] = ANSI_COLOR_WHITE;
+        setcha[setlen++] = 37;
         break;
     default:
-        setcha[setlen++] = ANSI_COLOR_WHITE;
+        setcha[setlen++] = 37;
         break;
     }
 
-    /* 색상 적용 방법: "\033[<색생코드1>;<색상코드2>;<색상코드3>m" */
-    sprintf(escbuf, "\033[%d", ANSI_COLOR_RESET);
+    sprintf(escbuf, "\033[0");
     esclen = strlen(escbuf);
-
     for (ii = 0; ii < setlen; ii++)
     {
         sprintf(&escbuf[esclen], ";%d", setcha[ii]);
@@ -943,8 +887,7 @@ void setattr(int attr)
     }
     sprintf(&escbuf[esclen], "m");
     esclen = strlen(escbuf);
-
-    /* 표준 출력으로 디자인이 적용된 값 쓰기 */
+    diff = attr ^ attribute;
     flush(escbuf);
 
     attribute = attr;

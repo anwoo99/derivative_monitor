@@ -388,7 +388,6 @@ int old_status_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *c
 
    if (folder == NULL)
    {
-      fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "Cannot get a folder for '%s'", head->code);
       return (-1);
    }
 
@@ -423,7 +422,6 @@ int old_quote_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *cl
 
    if (folder == NULL)
    {
-      fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "Cannot get a folder for '%s'", head->code);
       return (-1);
    }
 
@@ -433,6 +431,7 @@ int old_quote_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *cl
    quote->trtm = atoi(trade->trtm);
    quote->last = atof(trade->last);
    quote->tqty = atoi(trade->tqty);
+   quote->tvol = atoi(trade->tvol);
 
    if (quote->open != atof(trade->open))
    {
@@ -481,7 +480,6 @@ int old_cancel_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *c
 
    if (folder == NULL)
    {
-      fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "Cannot get a folder for '%s'", head->code);
       return (-1);
    }
 
@@ -492,11 +490,13 @@ int old_cancel_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *c
    quote->trtm = atoi(trade->trtm);
    quote->last = atof(trade->last);
    quote->tqty = atoi(trade->tqty);
+   quote->tvol = atoi(trade->tvol);
 
    cancel->trdt = atoi(trade->trdt);
    cancel->trtm = atoi(trade->trtm);
    cancel->last = atof(trade->last);
    cancel->tqty = atoi(trade->tqty);
+   cancel->tvol = atoi(trade->tvol);
 
    if (quote->open != atof(trade->open))
    {
@@ -564,7 +564,6 @@ int old_settle_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *c
 
    if (folder == NULL)
    {
-      fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "Cannot get a folder for '%s'", head->code);
       return (-1);
    }
 
@@ -620,7 +619,6 @@ int old_close_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *cl
 
    if (folder == NULL)
    {
-      fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "Cannot get a folder for '%s'", head->code);
       return (-1);
    }
 
@@ -661,7 +659,6 @@ int old_oint_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *cla
 
    if (folder == NULL)
    {
-      fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "Cannot get a folder for '%s'", head->code);
       return (-1);
    }
 
@@ -703,7 +700,6 @@ int old_depth_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *cl
 
    if (folder == NULL)
    {
-      fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "Cannot get a folder for '%s'", head->code);
       return (-1);
    }
 
@@ -757,7 +753,6 @@ int old_mavg_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *cla
 
    if (folder == NULL)
    {
-      fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "Cannot get a folder for '%s'", head->code);
       return (-1);
    }
 
@@ -795,7 +790,6 @@ int old_offi_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *cla
 
    if (folder == NULL)
    {
-      fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "Cannot get a folder for '%s'", head->code);
       return (-1);
    }
 
@@ -803,9 +797,10 @@ int old_offi_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *cla
 
    offi->trdt = atoi(trade->trdt);
    offi->trtm = atoi(trade->trtm);
-   offi->pbid = atof(trade->pbid);
-   offi->pask = atof(trade->pask);
-   offi->date = atoi(trade->date);
+   offi->uoffi_b = atof(trade->last);
+   offi->uoffi_s = atof(trade->open);
+   offi->offi_b = atof(trade->high);
+   offi->offi_s = atof(trade->lowp);
    offi->updated_at = current;
 
    return (0);
@@ -832,7 +827,6 @@ int old_ware_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *cla
 
    if (folder == NULL)
    {
-      fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "Cannot get a folder for '%s'", head->code);
       return (-1);
    }
 
@@ -876,7 +870,6 @@ int old_volm_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *cla
 
    if (folder == NULL)
    {
-      fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "Cannot get a folder for '%s'", head->code);
       return (-1);
    }
 

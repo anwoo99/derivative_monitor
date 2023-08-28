@@ -6,12 +6,12 @@ static int cmpfold(const void *a, const void *b)
     const FOLDER *folder_b = (const FOLDER *)b;
 
     // Compare symb first
-    int symb_cmp = strcmp(folder_a->symb, folder_b->symb);
+    int symb_cmp = strcmp(folder_a->hostname, folder_b->hostname);
     if (symb_cmp != 0)
         return symb_cmp;
 
     // If symb values are the same, compare hostname
-    return strcmp(folder_a->hostname, folder_b->hostname);
+    return strcmp(folder_a->symb, folder_b->symb);
 }
 
 FOLDER *getfolder(FEP *fep, const char *symb, const char *hostname)

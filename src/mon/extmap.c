@@ -248,7 +248,6 @@ int ext_quote_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *cl
 
     if (folder == NULL)
     {
-        fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "Cannot get a folder for '%s'", head->code);
         return (-1);
     }
 
@@ -305,7 +304,6 @@ int ext_settle_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *c
 
     if (folder == NULL)
     {
-        fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "Cannot get a folder for '%s'", head->code);
         return (-1);
     }
 
@@ -361,7 +359,6 @@ int ext_oint_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *cla
 
     if (folder == NULL)
     {
-        fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "Cannot get a folder for '%s'", head->code);
         return (-1);
     }
 
@@ -403,7 +400,6 @@ int ext_depth_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *cl
 
     if (folder == NULL)
     {
-        fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "Cannot get a folder for '%s'", head->code);
         return (-1);
     }
 

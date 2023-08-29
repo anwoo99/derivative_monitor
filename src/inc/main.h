@@ -110,6 +110,7 @@ int fep_config(FEP *fep);
 /* log.c */
 void fep_log(FEP *fep, int level, const char *caller_function, const char *format, ...);
 void null_to_space(char *msgb, int msgl);
+void quote_log(FEP *fep, char *hostname, int class_tag, const char *format, ...);
 
 /* file.c */
 int create_directory(char *dirname);

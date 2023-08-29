@@ -27,4 +27,6 @@ typedef struct
     int vrec;
 } MDARCH;
 
+unsigned long djb2(const char *str);
+
 #endif

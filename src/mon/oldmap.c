@@ -38,11 +38,17 @@ int old_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *class_tag)
    {
       old_trade_map(fep, port, msgb, msgl, class_tag);
    }
+
+   return (0);
 }
 
 int old_master_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *class_tag)
 {
-   if (*class_tag & STOCK)
+   if (*class_tag & LME)
+   {
+      old_lme_master_map(fep, port, msgb, msgl, class_tag);
+   }
+   else if (*class_tag & STOCK)
    {
       old_stock_master_map(fep, port, msgb, msgl, class_tag);
    }
@@ -57,10 +63,6 @@ int old_master_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *class_t
    else if (*class_tag & SPREAD)
    {
       old_spread_master_map(fep, port, msgb, msgl, class_tag);
-   }
-   else if (*class_tag & LME)
-   {
-      old_lme_master_map(fep, port, msgb, msgl, class_tag);
    }
 
    return (0);
@@ -398,6 +400,8 @@ int old_status_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *c
 
    status->updated_at = time(NULL);
 
+   quote_log(fep, folder->hostname, *class_tag, "%s bsdt[%d] status[%d]", head->code, status->bsdt, status->status);
+
    return (0);
 }
 
@@ -454,6 +458,8 @@ int old_quote_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *cl
    quote->date = atoi(trade->date);
 
    quote->updated_at = current;
+
+   quote_log(fep, folder->hostname, *class_tag, "%s V:%d T:%u L:%f O:%f H:%f L:%f", head->code, quote->tqty, quote->tvol, quote->last, quote->open, quote->high, quote->low);
 
    return (0);
 }
@@ -540,6 +546,8 @@ int old_cancel_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *c
    quote->updated_at = current;
    cancel->updated_at = current;
 
+   quote_log(fep, folder->hostname, *class_tag, "%s V:%d T:%u L:%f O:%f H:%f L:%f", head->code, cancel->tqty, cancel->tvol, cancel->last, cancel->open, cancel->high, cancel->low);
+
    return (0);
 }
 
@@ -595,6 +603,8 @@ int old_settle_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *c
 
    settle->updated_at = current;
 
+   quote_log(fep, folder->hostname, *class_tag, "%s T:%u L:%f O:%f H:%f L:%f", head->code, settle->tvol, settle->last, settle->open, settle->high, settle->low);
+
    return (0);
 }
 
@@ -635,6 +645,8 @@ int old_close_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *cl
 
    close->updated_at = current;
 
+   quote_log(fep, folder->hostname, *class_tag, "%s T:%u L:%f O:%f H:%f L:%f", head->code, close->tvol, close->last, close->open, close->high, close->low);
+
    return (0);
 }
 
@@ -674,6 +686,8 @@ int old_oint_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *cla
    oint->date = atoi(trade->date);
 
    oint->updated_at = current;
+
+   quote_log(fep, folder->hostname, *class_tag, "%s T:%u L:%f O:%f H:%f L:%f", head->code, oint->tvol, oint->last, oint->open, oint->high, oint->low);
 
    return (0);
 }
@@ -766,6 +780,8 @@ int old_mavg_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *cla
 
    mavg->updated_at = current;
 
+   quote_log(fep, folder->hostname, *class_tag, "%s BID: %f ASK: %f", head->code, mavg->pbid, mavg->pask);
+
    return (0);
 }
 
@@ -802,6 +818,8 @@ int old_offi_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *cla
    offi->offi_b = atof(trade->high);
    offi->offi_s = atof(trade->lowp);
    offi->updated_at = current;
+
+   quote_log(fep, folder->hostname, *class_tag, "%s UOFFI_B: %f UOFFI_S: %f OFFI_B: %f OFFI_S: %f", head->code, offi->uoffi_b, offi->uoffi_s, offi->offi_b, offi->offi_s);
 
    return (0);
 }
@@ -846,6 +864,8 @@ int old_ware_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *cla
 
    ware->updated_at = current;
 
+   quote_log(fep, folder->hostname, *class_tag, "%s WINCDAY: %d WOUTCDAY: %d WOPEN: %d WCLOSE: %d WCHG: %d WWCLOS: %d WWCANL: %d", head->code, ware->wincday, ware->woutcday, ware->wopen, ware->wclose, ware->wchg, ware->wwclos, ware->wwcanl);
+
    return (0);
 }
 
@@ -883,6 +903,8 @@ int old_volm_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *cla
    volm->date = atoi(trade->date);
 
    volm->updated_at = current;
+
+   quote_log(fep, folder->hostname, *class_tag, "%s CULMVOL: %d PREVVOL: %d", head->code, volm->culmvol, volm->prevvol);
 
    return (0);
 }

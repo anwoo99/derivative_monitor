@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
     strcpy(exnm, argv[1]);
 
     fep = fep_open(exnm, MD_RDWR);
-
+    
     if (fep == NULL)
     {
         fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "fep_open() for %s is failed!", exnm);
@@ -48,6 +48,9 @@ int main(int argc, char *argv[])
 
         recvctx[ii].seqn = ii;
         recvctx[ii].fep = fep;
+
+        fep_log(fep, FL_MUST, GET_CALLER_FUNCTION(), "%s_%s_%s process start..!", fep->exnm, fep->config.ports[ii].host, fep->config.ports[ii].name);
+        
         pthread_create(&recvctx[ii].thread, NULL, recv_to_send, &recvctx[ii]);
     }
 

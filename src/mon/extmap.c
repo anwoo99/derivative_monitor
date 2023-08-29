@@ -28,6 +28,8 @@ int ext_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *class_tag)
     {
         ext_trade_map(fep, port, msgb, msgl, class_tag);
     }
+
+    return (0);
 }
 
 int ext_master_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *class_tag)
@@ -280,6 +282,8 @@ int ext_quote_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *cl
 
     quote->updated_at = current;
 
+    quote_log(fep, folder->hostname, *class_tag, "%s V:%d T:%u L:%f O:%f H:%f L:%f", head->code, quote->tqty, quote->tvol, quote->last, quote->open, quote->high, quote->low);
+
     return (0);
 }
 
@@ -335,6 +339,8 @@ int ext_settle_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *c
 
     settle->updated_at = current;
 
+    quote_log(fep, folder->hostname, *class_tag, "%s T:%u L:%f O:%f H:%f L:%f", head->code, settle->tvol, settle->last, settle->open, settle->high, settle->low);
+
     return (0);
 }
 
@@ -374,6 +380,8 @@ int ext_oint_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *cla
     oint->date = atoi(trade->date);
 
     oint->updated_at = current;
+
+    quote_log(fep, folder->hostname, *class_tag, "%s T:%u L:%f O:%f H:%f L:%f", head->code, oint->tvol, oint->last, oint->open, oint->high, oint->low);
 
     return (0);
 }

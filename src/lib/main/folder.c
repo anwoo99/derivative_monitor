@@ -1,16 +1,14 @@
 #include "context.h"
 
-static int cmpfold(const void *a, const void *b)
+static int cmpfold(FOLDER *folder_a, FOLDER *folder_b)
 {
-    const FOLDER *folder_a = (const FOLDER *)a;
-    const FOLDER *folder_b = (const FOLDER *)b;
-
-    // Compare symb first
+    // Compare hostname first
     int symb_cmp = strcmp(folder_a->hostname, folder_b->hostname);
+
     if (symb_cmp != 0)
         return symb_cmp;
 
-    // If symb values are the same, compare hostname
+    // If hostname values are the same, compare symbol
     return strcmp(folder_a->symb, folder_b->symb);
 }
 
@@ -26,9 +24,9 @@ FOLDER *getfolder(FEP *fep, const char *symb, const char *hostname)
 
     folder = fep->fold;
 
-    memset(&f, 0x00, sizeof(f));
     strcpy(f.symb, symb);
     strcpy(f.hostname, hostname);
+
     return (bsearch(&f, folder, mdarch->vrec, sizeof(FOLDER), cmpfold));
 }
 
@@ -42,18 +40,20 @@ FOLDER *newfolder(FEP *fep, const char *symb, const char *hostname)
     {
         return (NULL);
     }
+
     if ((folder = getfolder(fep, symb, hostname)) != NULL)
     {
         return (folder);
     }
-    if (mdarch->vrec >= mdarch->mrec)
+ 
+    if (mdarch->vrec + 1 >= mdarch->mrec)
     {
         fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "The shared memory for quote is full %d/%d", mdarch->vrec, mdarch->mrec);
         return (NULL);
     }
 
     folder = fep->fold;
-
+;
     memset(&f, 0x00, sizeof(f));
     strcpy(f.symb, symb);
     strcpy(f.hostname, hostname);

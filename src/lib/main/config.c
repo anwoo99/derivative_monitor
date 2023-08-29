@@ -94,6 +94,7 @@ int parse_config_json(CONFIG *config, JSON_Value *root_value)
         port->seqn = i + 1;
         port->running = strcmp(json_object_get_string(port_object, "running"), "ON") == 0 ? true : false;
         port->alert = strcmp(json_object_get_string(port_object, "alert"), "ON") == 0 ? true : false;
+        
         snprintf(port->name, sizeof(port->name), "%s", json_object_get_string(port_object, "name"));
         snprintf(port->host, sizeof(port->host), "%s", json_object_get_string(port_object, "host"));
         snprintf(port->type, sizeof(port->type), "%s", json_object_get_string(port_object, "type"));

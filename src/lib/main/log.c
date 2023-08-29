@@ -2,8 +2,8 @@
 
 void fep_log(FEP *fep, int level, const char *caller_function, const char *format, ...)
 {
-    time_t korean_time;
-    struct tm korean_tm;
+    time_t korean_time, make_time, current;
+    struct tm korean_tm, make_tm;
     char logpath[128];
     char mode[2] = "a";
     struct stat lstat;
@@ -13,15 +13,14 @@ void fep_log(FEP *fep, int level, const char *caller_function, const char *forma
     if (level > fep->config.settings.logLevel)
         return;
 
-    korean_time = time(NULL) + (60 * 60 * 9); // KST (UTC+9)
-    korean_tm = *gmtime(&korean_time);
+    korean_time = time(NULL);
+    fep_utc2kst(current, &korean_time, &korean_tm);
 
     snprintf(logpath, sizeof(logpath), "%s/%s-%d.log", LOG_DIR, fep->exnm, korean_tm.tm_wday);
 
     if (stat(logpath, &lstat) == 0)
     {
-        time_t make_time = lstat.st_mtime + (60 * 60 * 9); // KST (UTC+9)
-        struct tm make_tm = *gmtime(&make_time);
+        fep_utc2kst(lstat.st_mtime, &make_time, &make_tm);
 
         if (make_tm.tm_yday != korean_tm.tm_yday)
             mode[0] = 'w';

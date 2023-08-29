@@ -34,9 +34,9 @@ static void pushdept(char *name, double val, int color, int push, int seqn);
 static void editprc(char *fldb, double val, int flag);
 
 static void get_status(int status_code, char *status_str);
-static void get_styp(uint32_t styp, char *styp_str)
+static void get_styp(uint32_t styp, char *styp_str);
 
-    static char form[16];
+static char form[16];
 static int main_f, sub_f, zdiv;
 static double base;
 char s_next[80];
@@ -72,18 +72,20 @@ int update(void *qptr, int what, int push, int seqn)
         pushchk("OPEN", quot->open, FC_WHITE, push, seqn);
         pushchk("HIGH", quot->high, FC_WHITE, push, seqn);
         pushchk("LOW", quot->low, FC_WHITE, push, seqn);
-
-        if (quot->last != 0.)
-            pushchk("LAST", quot->last, FC_WHITE, push, seqn);
-        else
-            pushchk("LAST", quot->setp, FC_WHITE, push, seqn);
-
+        pushchk("LAST", quot->last, FC_WHITE, push, seqn);
         pushlng("TVOL", quot->tvol, FC_WHITE, push, seqn);
 
-        pushksttime("UTIM", quot->update_at, FC_WHITE, push, seqn);
+        if (kst4time)
+        {
+            pushksttime("QUOT_UTIM", quot->updated_at, FC_WHITE, push, seqn); // 업데이트 시각
+        }
+        else
+        {
+            pushlocaltime("QUOT_UTIM", quot->updated_at, FC_WHITE, push, seqn); // 업데이트 시각
+        }
 
         if (!push)
-            rqsymb(fep->exnm, quot->symb, PUSH_QUOT, seqn);
+            rqsymb(fep->exnm, quot->symb, fold->hostname, PUSH_QUOT, seqn);
 
         break;
     }
@@ -91,7 +93,7 @@ int update(void *qptr, int what, int push, int seqn)
     {
         FOLDER *fold = qptr;
         MDMSTR *mstr = &fold->mstr;
-        MDQUOT *quot = &fold->quot;
+        MDQUOT *quot = &fold->quote;
         MDQUOT *settle = fold->settle;
         MDQUOT *close = &fold->close;
         MDQUOT *cancel = &fold->cancel;
@@ -103,10 +105,7 @@ int update(void *qptr, int what, int push, int seqn)
         MDSTAT *status = &fold->status;
         MDDEPT *dept = &fold->depth;
         char status_str[256];
-
-        uint32_t kymd, khms;
         int ii, jj;
-        char str_hms[20];
 
         if (!push)
             str2fld("oNAME", mstr->symb_desc);
@@ -389,7 +388,7 @@ int update(void *qptr, int what, int push, int seqn)
                     pushdept("ASK_PRICE", dept->ask[jj].price, FC_WHITE, push, ii); // 매도 가격
                     pushint("ASK_TOTAL", dept->ask[jj].total, FC_WHITE, push, ii);  // 매도 전체 주문량
 
-                    if (dept->ask[jj].nask != 0)
+                    if (dept->ask[jj].qtqy != 0)
                         pushint("ASK_QTQY", dept->ask[jj].qtqy, FC_WHITE, push, ii); // 매도 실시간 주문량
                     else
                         pushstr("ASK_QTQY", " ", FC_WHITE, push, ii);
@@ -406,7 +405,7 @@ int update(void *qptr, int what, int push, int seqn)
                     pushdept("BID_PRICE", dept->bid[ii].price, FC_WHITE, push, ii); // 매수 가격
                     pushint("BID_TOTAL", dept->bid[ii].total, FC_WHITE, push, ii);  // 매수 전체 주문량
 
-                    if (dept->bid[ii].nbid != 0)
+                    if (dept->bid[ii].qtqy != 0)
                         pushint("BID_QTQY", dept->bid[ii].qtqy, FC_WHITE, push, ii); // 매수 실시간 주문량
                     else
                         pushstr("BID_QTQY", " ", FC_WHITE, push, ii);
@@ -437,13 +436,13 @@ int update(void *qptr, int what, int push, int seqn)
             pushchk("T.LOW", quot->low, FC_WHITE, 0, 0);
 
             /* Cancel */
-            pushhms("C.XHMS", cacnel->trtm / 1000000, FC_WHITE, 0, 0);
-            pushchk("C.LAST", cacnel->last, FC_WHITE, 0, 0);
-            pushint("C.TQTY", cacnel->tqty, FC_WHITE, 0, 0);
-            pushlng("C.TVOL", cacnel->tvol, FC_WHITE, 0, 0);
-            pushchk("C.OPEN", cacnel->open, FC_WHITE, 0, 0);
-            pushchk("C.HIGH", cacnel->high, FC_WHITE, 0, 0);
-            pushchk("C.LOW", cacnel->low, FC_WHITE, 0, 0);
+            pushhms("C.XHMS", cancel->trtm / 1000000, FC_WHITE, 0, 0);
+            pushchk("C.LAST", cancel->last, FC_WHITE, 0, 0);
+            pushint("C.TQTY", cancel->tqty, FC_WHITE, 0, 0);
+            pushlng("C.TVOL", cancel->tvol, FC_WHITE, 0, 0);
+            pushchk("C.OPEN", cancel->open, FC_WHITE, 0, 0);
+            pushchk("C.HIGH", cancel->high, FC_WHITE, 0, 0);
+            pushchk("C.LOW", cancel->low, FC_WHITE, 0, 0);
             break;
         }
         /*************************************************************************/
@@ -459,10 +458,6 @@ int update(void *qptr, int what, int push, int seqn)
     {
         FOLDER *fold = qptr;
         MDMSTR *mstr = &fold->mstr;
-        uint32_t kymd, khms;
-        char tmpb[40];
-        char str_ymd[20];
-        char str_hms[20];
         char styp_str[256];
 
         if (!push)
@@ -516,8 +511,8 @@ int update(void *qptr, int what, int push, int seqn)
         {
             pushlocaltime("MSTR_UTIM", mstr->updated_at, FC_WHITE, push, seqn);
         }
+        break;
     }
-    break;
     }
     return (0);
 }

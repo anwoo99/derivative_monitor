@@ -28,6 +28,50 @@
 #define RT_PUSH_MSG 6
 #define RT_INI_SYMB 9
 
+#define MAX_PUSH_LEN 800
+#define L_SYMB 20
+
+typedef unsigned int mask_t;
+
+typedef struct
+{
+    int flag;      /* general flags             */
+    void *self;    /* myself                    */
+    void *myrq;    /* mymq interface            */
+    char errm[80]; /* general error message */
+} RTD;
+
+struct pushmsg
+{
+    uint32_t seqn;           /* sequencial number(=func)    */
+    char symb[L_SYMB];       /* symbol                      */
+    mask_t mask;             /* event mask                  */
+    uint8_t type;            /* message type                        */
+    uint8_t flag;            /* ticker or scroll flags      */
+    uint16_t msgl;           /* length of rmsg[]            */
+    char msgb[MAX_PUSH_LEN]; /* real-time message           */
+};
+typedef struct pushmsg pushmsg_t;
+
+struct pushdata
+{
+    long mkid;         /* market id                 */
+    pushmsg_t pushmsg; /* real message to push              */
+};
+typedef struct pushdata pushdata_t;
+
+struct pushsymb
+{
+    long many;
+    struct realsymb
+    {
+        uint32_t func;
+        mask_t mask;
+        char symb[L_SYMB];
+    } push[1];
+};
+typedef struct pushsymb pushsymb_t;
+
 struct rt_hooked
 {
     char symb[L_SYMB]; /* symbol code                  */
@@ -154,6 +198,13 @@ extern "C"
     int rt_packet_full(struct rt_pkth *pkth, struct pushmsg *pushmsg, int howmany, int timeout);
     void rt_packet_sig(struct rt_pkth *);
     void rt_packet_reset(struct rt_pkth *);
+
+    RTD *rtd_open(int port, const char *ipad);
+    int rtd_send(RTD *rtd, struct pushsymb *pushsymb);
+    int rtd_recv(RTD *rtd, struct pushmsg *pushmsg, int howmany);
+    int rtd_timedrecv(RTD *rtd, struct pushmsg *pushmsg, int howmany, int timeout);
+    int rtd_close(RTD *rtd);
+    int rtd_push(struct pushdata *pushdata);
 
 #ifdef __cplusplus
 }

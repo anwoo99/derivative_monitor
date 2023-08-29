@@ -29,6 +29,7 @@ extern "C"
     extern char i_scrn[], s_scrn[];
     extern char i_exch[], s_exch[];
     extern char i_symb[], s_symb[];
+    extern char i_host[], s_host[];
     extern char s_path[], s_next[];
     extern int delayed;
     extern int nfld;

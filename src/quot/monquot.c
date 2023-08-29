@@ -40,9 +40,9 @@ struct field form4hd[] = {
     {FT_OUTPUT, "", 2, 1, 0, "Choice ", FA_BOLD | FC_YELLOW, -1, 0},
     {FT_INPUT, "iSCRN", 2, 9, 3, "", FA_BOLD | FC_YELLOW, -1, 0},
     {FT_INPUT, "iEXCH", 2, 13, 4, "", FA_BOLD | FC_YELLOW, -1, 0},
-    {FT_INPUT, "iHOST", 2, 18, 10, "", FA_BOLD | FC_YELLOW, -1, 0},
-    {FT_INPUT, "iSYMB", 2, 29, 32, "", FA_BOLD | FC_YELLOW, -1, 0},
-    {FT_OUTPUT, "oNAME", 2, 52, 128, "", FA_BOLD | FC_YELLOW, -1, FLD_IS_LEFT},
+    {FT_INPUT, "iHOST", 2, 18, 5, "", FA_BOLD | FC_YELLOW, -1, 0},
+    {FT_INPUT, "iSYMB", 2, 24, 32, "", FA_BOLD | FC_YELLOW, -1, 0},
+    {FT_OUTPUT, "oNAME", 2, 57, 128, "", FA_BOLD | FC_YELLOW, -1, FLD_IS_LEFT},
     {-1, "", 0, 0, 0, "", 0, -1, 0}};
 
 int main(int argc, char *argv[])
@@ -64,6 +64,8 @@ int main(int argc, char *argv[])
 
     mapopen((char *)g_scrn);
     str2fld("iSCRN", g_scrn);
+    str2fld("iEXCH", "FCME");
+    str2fld("iHOST", "CME20");
 
     while (1)
     {

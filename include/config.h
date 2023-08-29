@@ -3,6 +3,7 @@
 
 #define MAX_PORT 64
 #define MAX_TIME 10
+#define MAX_DEFINITION 16
 
 typedef struct
 {
@@ -91,5 +92,22 @@ typedef struct
     PORT ports[MAX_PORT];
     int nport;
 } CONFIG;
+
+struct xmltag
+{
+    char tags[32];
+    int many;
+    struct
+    {
+        char name[32];
+        char vals[512];
+    } defs[MAX_DEFINITION];
+    int eotf;
+};
+
+int getxmlcfg(const char *xmlpath, struct xmltag *);
+void getargv(struct xmltag *, char *, int *);
+void getargs(struct xmltag *, char *, char *);
+void getargx(struct xmltag *xml, char *name, int *v, int *n, int max);
 
 #endif

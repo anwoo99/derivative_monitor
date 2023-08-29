@@ -1,0 +1,386 @@
+
+Allocating common symbols
+Common symbol       size              file
+
+scrn_xref           0x8               term.o
+MAX_ROW             0x4               term.o
+scrn_xpos           0x8               term.o
+MAX_COL             0x4               term.o
+MAX_SIZ             0x4               term.o
+scrn_type           0x8               term.o
+scrn_char           0x8               term.o
+
+Discarded input sections
+
+ .note.GNU-stack
+                0x0000000000000000        0x0 term.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 getkey.o
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+*default*        0x0000000000000000 0xffffffffffffffff
+
+Linker script and memory map
+
+LOAD term.o
+LOAD getkey.o
+LOAD /usr/lib64/libc.so
+START GROUP
+LOAD /lib64/libc.so.6
+LOAD /usr/lib64/libc_nonshared.a
+LOAD /lib64/ld-linux-x86-64.so.2
+END GROUP
+LOAD /usr/lib64/libnsl.so
+                0x0000000000000120                . = (0x0 + SIZEOF_HEADERS)
+
+.note.gnu.build-id
+ *(.note.gnu.build-id)
+
+.hash           0x0000000000000120      0x228
+ *(.hash)
+ .hash          0x0000000000000120      0x228 term.o
+
+.gnu.hash
+ *(.gnu.hash)
+
+.dynsym         0x0000000000000348      0x678
+ *(.dynsym)
+ .dynsym        0x0000000000000348      0x678 term.o
+
+.dynstr         0x00000000000009c0      0x24e
+ *(.dynstr)
+ .dynstr        0x00000000000009c0      0x24e term.o
+
+.gnu.version    0x0000000000000c0e       0x8a
+ *(.gnu.version)
+ .gnu.version   0x0000000000000c0e       0x8a term.o
+
+.gnu.version_d  0x0000000000000c98        0x0
+ *(.gnu.version_d)
+ .gnu.version_d
+                0x0000000000000000        0x0 term.o
+
+.gnu.version_r  0x0000000000000c98       0x20
+ *(.gnu.version_r)
+ .gnu.version_r
+                0x0000000000000c98       0x20 term.o
+
+.rela.dyn       0x0000000000000cb8      0x108
+ *(.rela.init)
+ *(.rela.text .rela.text.* .rela.gnu.linkonce.t.*)
+ *(.rela.fini)
+ *(.rela.rodata .rela.rodata.* .rela.gnu.linkonce.r.*)
+ *(.rela.data .rela.data.* .rela.gnu.linkonce.d.*)
+ *(.rela.tdata .rela.tdata.* .rela.gnu.linkonce.td.*)
+ *(.rela.tbss .rela.tbss.* .rela.gnu.linkonce.tb.*)
+ *(.rela.ctors)
+ *(.rela.dtors)
+ *(.rela.got)
+ .rela.got      0x0000000000000cb8      0x108 term.o
+ *(.rela.sharable_data .rela.sharable_data.* .rela.gnu.linkonce.shrd.*)
+ *(.rela.sharable_bss .rela.sharable_bss.* .rela.gnu.linkonce.shrb.*)
+ *(.rela.bss .rela.bss.* .rela.gnu.linkonce.b.*)
+ *(.rela.ldata .rela.ldata.* .rela.gnu.linkonce.l.*)
+ *(.rela.lbss .rela.lbss.* .rela.gnu.linkonce.lb.*)
+ *(.rela.lrodata .rela.lrodata.* .rela.gnu.linkonce.lr.*)
+ *(.rela.ifunc)
+ .rela.ifunc    0x0000000000000000        0x0 term.o
+
+.rela.plt       0x0000000000000dc0      0x330
+ *(.rela.plt)
+ .rela.plt      0x0000000000000dc0      0x330 term.o
+ *(.rela.iplt)
+
+.init
+ *(.init)
+
+.plt            0x00000000000010f0      0x230
+ *(.plt)
+ .plt           0x00000000000010f0      0x230 term.o
+ *(.iplt)
+
+.text           0x0000000000001320     0x2803
+ *(.text.unlikely .text.*_unlikely)
+ *(.text .stub .text.* .gnu.linkonce.t.*)
+ .text          0x0000000000001320     0x20d7 term.o
+                0x0000000000001320                setattr
+                0x0000000000001529                restorepos
+                0x0000000000001564                savepos
+                0x000000000000159f                cursor
+                0x000000000000164a                setpos
+                0x00000000000016e0                cha2scr
+                0x00000000000017ec                setfocus
+                0x0000000000001986                curfld
+                0x0000000000001a13                str2scr
+                0x0000000000001bc7                insline
+                0x0000000000001e45                clreol
+                0x0000000000001ef7                clreos
+                0x0000000000001f2b                clrscrn
+                0x00000000000020a7                putfld
+                0x00000000000024bc                fldattr
+                0x0000000000002514                getfld
+                0x00000000000026b8                clrfld
+                0x000000000000283a                attr2fld
+                0x00000000000028a1                uint2fld
+                0x00000000000029a8                int2fld
+                0x0000000000002aaf                str2fld
+                0x0000000000002bb8                hms2fld
+                0x0000000000002c2e                ymd2fld
+                0x0000000000002cbc                cur2fld
+                0x0000000000002d24                endfld
+                0x0000000000002dc2                pushfld
+                0x0000000000002f86                initpush
+                0x0000000000003097                closeterm
+                0x00000000000030ef                openterm
+ *fill*         0x00000000000033f7        0x9 90909090
+ .text          0x0000000000003400      0x723 getkey.o
+                0x0000000000003400                getkey
+ *(.gnu.warning)
+
+.fini
+ *(.fini)
+                0x0000000000003b23                PROVIDE (__etext, .)
+                0x0000000000003b23                PROVIDE (_etext, .)
+                0x0000000000003b23                PROVIDE (etext, .)
+
+.rodata         0x0000000000003b24       0xa4
+ *(.rodata .rodata.* .gnu.linkonce.r.*)
+ .rodata.str1.1
+                0x0000000000003b24       0x69 term.o
+ *fill*         0x0000000000003b8d        0x3 00
+ .rodata        0x0000000000003b90       0x24 term.o
+ .rodata        0x0000000000003bb4       0x14 getkey.o
+
+.rodata1
+ *(.rodata1)
+
+.eh_frame_hdr
+ *(.eh_frame_hdr)
+
+.eh_frame       0x0000000000003bc8      0x5b8
+ *(.eh_frame)
+ .eh_frame      0x0000000000003bc8      0x568 term.o
+                                        0x520 (size before relaxing)
+ .eh_frame      0x0000000000004130       0x50 getkey.o
+                                         0x68 (size before relaxing)
+
+.gcc_except_table
+ *(.gcc_except_table .gcc_except_table.*)
+                0x0000000000004180                . = (ALIGN (0x200000) - ((0x200000 - .) & 0x1fffff))
+                0x0000000000204180                . = (0x200000 DATA_SEGMENT_ALIGN 0x1000)
+
+.eh_frame
+ *(.eh_frame)
+
+.gcc_except_table
+ *(.gcc_except_table .gcc_except_table.*)
+
+.tdata
+ *(.tdata .tdata.* .gnu.linkonce.td.*)
+
+.tbss
+ *(.tbss .tbss.* .gnu.linkonce.tb.*)
+ *(.tcommon)
+
+.preinit_array
+ *(.preinit_array)
+
+.init_array
+ *(SORT(.init_array.*))
+ *(.init_array)
+
+.fini_array
+ *(.fini_array)
+ *(SORT(.fini_array.*))
+
+.ctors
+ *crtbegin.o(.ctors)
+ *crtbegin?.o(.ctors)
+ *(EXCLUDE_FILE(*crtend?.o *crtend.o) .ctors)
+ *(SORT(.ctors.*))
+ *(.ctors)
+
+.dtors
+ *crtbegin.o(.dtors)
+ *crtbegin?.o(.dtors)
+ *(EXCLUDE_FILE(*crtend?.o *crtend.o) .dtors)
+ *(SORT(.dtors.*))
+ *(.dtors)
+
+.jcr
+ *(.jcr)
+
+.data.rel.ro
+ *(.data.rel.ro.local* .gnu.linkonce.d.rel.ro.local.*)
+ *(.data.rel.ro* .gnu.linkonce.d.rel.ro.*)
+
+.dynamic        0x0000000000204180      0x170
+ *(.dynamic)
+ .dynamic       0x0000000000204180      0x170 term.o
+                0x0000000000204180                _DYNAMIC
+
+.got            0x00000000002042f0       0x58
+ *(.got)
+ .got           0x00000000002042f0       0x58 term.o
+ *(.igot)
+                0x0000000000204348                . = (. DATA_SEGMENT_RELRO_END 0x18)
+
+.got.plt        0x0000000000204348      0x128
+ *(.got.plt)
+ .got.plt       0x0000000000204348      0x128 term.o
+                0x0000000000204348                _GLOBAL_OFFSET_TABLE_
+ *(.igot.plt)
+
+.data           0x0000000000204480      0x124
+ *(.data .data.* .gnu.linkonce.d.*)
+ .data          0x0000000000204480        0xc term.o
+                0x0000000000204480                focused
+ *fill*         0x000000000020448c       0x14 00
+ .data          0x00000000002044a0      0x104 getkey.o
+
+.data1
+ *(.data1)
+
+.sharable_data  0x0000000000400000        0x0
+                0x0000000000400000                PROVIDE (__sharable_data_start, .)
+ *(.sharable_data .sharable_data.* .gnu.linkonce.shrd.*)
+                0x0000000000400000                . = ALIGN ((. != 0x0)?0x200000:0x1)
+                0x0000000000400000                PROVIDE (__sharable_data_end, .)
+                0x0000000000400000                _edata = .
+                0x0000000000400000                PROVIDE (edata, .)
+                0x0000000000400000                __bss_start = .
+
+.bss            0x00000000002045c0      0x198
+ *(.dynbss)
+ .dynbss        0x0000000000000000        0x0 term.o
+ *(.bss .bss.* .gnu.linkonce.b.*)
+ .bss           0x00000000002045c0      0x168 term.o
+                0x00000000002045c0                no_of_input
+ .bss           0x0000000000204728        0x0 getkey.o
+ *(COMMON)
+ COMMON         0x0000000000204728       0x30 term.o
+                0x0000000000204728                scrn_xref
+                0x0000000000204730                MAX_ROW
+                0x0000000000204738                scrn_xpos
+                0x0000000000204740                MAX_COL
+                0x0000000000204744                MAX_SIZ
+                0x0000000000204748                scrn_type
+                0x0000000000204750                scrn_char
+                0x0000000000204758                . = ALIGN ((. != 0x0)?0x8:0x1)
+
+.lbss
+ *(.dynlbss)
+ *(.lbss .lbss.* .gnu.linkonce.lb.*)
+ *(LARGE_COMMON)
+
+.sharable_bss   0x0000000000400000        0x0
+                0x0000000000400000                PROVIDE (__sharable_bss_start, .)
+ *(.dynsharablebss)
+ *(.sharable_bss .sharable_bss.* .gnu.linkonce.shrb.*)
+ *(SHARABLE_COMMON)
+                0x0000000000400000                . = ALIGN ((. != 0x0)?0x200000:0x1)
+                0x0000000000400000                PROVIDE (__sharable_bss_end, .)
+                0x0000000000400000                . = ALIGN (0x8)
+
+.lrodata
+ *(.lrodata .lrodata.* .gnu.linkonce.lr.*)
+
+.ldata          0x0000000000604758        0x0
+ *(.ldata .ldata.* .gnu.linkonce.l.*)
+                0x0000000000604758                . = ALIGN ((. != 0x0)?0x8:0x1)
+                0x0000000000604758                . = ALIGN (0x8)
+                0x0000000000604758                _end = .
+                0x0000000000604758                PROVIDE (end, .)
+                0x0000000000604758                . = DATA_SEGMENT_END (.)
+
+.stab
+ *(.stab)
+
+.stabstr
+ *(.stabstr)
+
+.stab.excl
+ *(.stab.excl)
+
+.stab.exclstr
+ *(.stab.exclstr)
+
+.stab.index
+ *(.stab.index)
+
+.stab.indexstr
+ *(.stab.indexstr)
+
+.comment        0x0000000000000000       0x2c
+ *(.comment)
+ .comment       0x0000000000000000       0x2c term.o
+                                         0x2d (size before relaxing)
+ .comment       0x0000000000000000       0x2d getkey.o
+
+.debug
+ *(.debug)
+
+.line
+ *(.line)
+
+.debug_srcinfo
+ *(.debug_srcinfo)
+
+.debug_sfnames
+ *(.debug_sfnames)
+
+.debug_aranges
+ *(.debug_aranges)
+
+.debug_pubnames
+ *(.debug_pubnames)
+
+.debug_info
+ *(.debug_info .gnu.linkonce.wi.*)
+
+.debug_abbrev
+ *(.debug_abbrev)
+
+.debug_line
+ *(.debug_line)
+
+.debug_frame
+ *(.debug_frame)
+
+.debug_str
+ *(.debug_str)
+
+.debug_loc
+ *(.debug_loc)
+
+.debug_macinfo
+ *(.debug_macinfo)
+
+.debug_weaknames
+ *(.debug_weaknames)
+
+.debug_funcnames
+ *(.debug_funcnames)
+
+.debug_typenames
+ *(.debug_typenames)
+
+.debug_varnames
+ *(.debug_varnames)
+
+.debug_pubtypes
+ *(.debug_pubtypes)
+
+.debug_ranges
+ *(.debug_ranges)
+
+.gnu.attributes
+ *(.gnu.attributes)
+
+/DISCARD/
+ *(.note.GNU-stack)
+ *(.gnu_debuglink)
+ *(.gnu.lto_*)
+OUTPUT(libpen.so elf64-x86-64)

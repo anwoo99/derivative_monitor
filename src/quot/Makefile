@@ -4,12 +4,14 @@ LIB=$(LIB_DIR)
 INC=$(INC_DIR)
 
 CFLAGS=-O -I../inc -I../../inc $(MY_CFLAGS)
-LFLAGS=$(MY_LFLAGS) -L../lib/fep -lFEP -L../lib/pen -lpen -lcurses
+LFLAGS=$(MY_LFLAGS) -L../lib/main -lMAIN -L../lib/pen -lpen -lcurses
 AFLAGS=$(MY_AFLAGS)
 AROPTS=$(MY_AROPTS)
 
 LIBOBJ=libOBJ.o
-INCINC=./quot.h ../inc/context.h ../inc/fep.h ../inc/schema.h ../inc/config.h
+INCINC=../inc/main.h ../inc/context.h ../inc/config.h ../inc/parson.h ../inc/schema.h ../inc/extpkt.h \
+       ../inc/oldpkt.h ../inc/quot.h ../inc/pen.h ../inc/push.h
+CMD=monquot
 
 # Default Rules:
 .c:
@@ -28,9 +30,10 @@ INCINC=./quot.h ../inc/context.h ../inc/fep.h ../inc/schema.h ../inc/config.h
 .c~.c:
 	$(GET) $(GFLAGS) $<
 
-all:		fepquot
-fepquot:	fepquot.c $(INCINC) $(LIBOBJ)
-		$(CC) -o fepquot fepquot.c $(LIBOBJ) $(CFLAGS) $(LFLAGS)
+all:		$(CMD)
+
+monquot:	monquot.c $(INCINC) $(LIBOBJ)
+		$(CC) -o monquot monquot.c $(LIBOBJ) $(CFLAGS) $(LFLAGS)
 
 $(LIBOBJ): 	$(LIBOBJ)(map.o)	$(LIBOBJ)(realtime.o)	\
 	   	$(LIBOBJ)(query.o)	$(LIBOBJ)(update.o)	
@@ -43,6 +46,6 @@ $(LIBOBJ)(realtime.o): 	$(INCINC)
 $(LIBOBJ)(update.o): 	$(INCINC)
 
 install: all
-	install fepquot $(BIN_DIR)
+	install $(CMD) $(BIN_DIR)
 clean:	
-	rm -f *.o fepquot
+	rm -f *.o $(CMD)

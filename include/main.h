@@ -28,11 +28,15 @@
 #include <ifaddrs.h>
 #include <dirent.h>
 #include <netinet/tcp.h>
+#include <math.h>
+
 #include "parson.h"
 #include "config.h"
 #include "schema.h"
 #include "oldpkt.h"
 #include "extpkt.h"
+
+#define RTD_PORT 7971
 
 /* Logging Flag */
 #define FL_MUST 0

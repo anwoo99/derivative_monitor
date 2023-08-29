@@ -36,6 +36,8 @@
 #include "oldpkt.h"
 #include "extpkt.h"
 
+#define RTD_PORT 7971
+
 /* Logging Flag */
 #define FL_MUST 0
 #define FL_ERROR 1

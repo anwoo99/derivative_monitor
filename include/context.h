@@ -20,12 +20,6 @@ typedef struct
 
 typedef struct
 {
-    char hostname[128];
-    int vrec;
-} HOST_TABLE;
-
-typedef struct
-{
     CONFIG config;
     HOLIDAY holiday;
     int flag;

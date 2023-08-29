@@ -34,8 +34,9 @@ static void pushdept(char *name, double val, int color, int push, int seqn);
 static void editprc(char *fldb, double val, int flag);
 
 static void get_status(int status_code, char *status_str);
+static void get_styp(uint32_t styp, char *styp_str)
 
-static char form[16];
+    static char form[16];
 static int main_f, sub_f, zdiv;
 static double base;
 char s_next[80];
@@ -108,7 +109,7 @@ int update(void *qptr, int what, int push, int seqn)
         char str_hms[20];
 
         if (!push)
-            str2fld("oNAME", fep->enam);
+            str2fld("oNAME", mstr->symb_desc);
 
         main_f = mstr->main_f;
         sub_f = mstr->sub_f;
@@ -421,11 +422,12 @@ int update(void *qptr, int what, int push, int seqn)
         /*************************************************************************/
 
         /*************************************************************************/
-        /* Quote(T21) */
+        /* Quote(T21) & Cancel(T24) */
         if (push == 1)
         {
             insline(40, 1);
 
+            /* Quote */
             pushhms("T.XHMS", quot->trtm / 1000000, FC_WHITE, 0, 0);
             pushchk("T.LAST", quot->last, FC_WHITE, 0, 0);
             pushint("T.TQTY", quot->tqty, FC_WHITE, 0, 0);
@@ -433,6 +435,15 @@ int update(void *qptr, int what, int push, int seqn)
             pushchk("T.OPEN", quot->open, FC_WHITE, 0, 0);
             pushchk("T.HIGH", quot->high, FC_WHITE, 0, 0);
             pushchk("T.LOW", quot->low, FC_WHITE, 0, 0);
+
+            /* Cancel */
+            pushhms("C.XHMS", cacnel->trtm / 1000000, FC_WHITE, 0, 0);
+            pushchk("C.LAST", cacnel->last, FC_WHITE, 0, 0);
+            pushint("C.TQTY", cacnel->tqty, FC_WHITE, 0, 0);
+            pushlng("C.TVOL", cacnel->tvol, FC_WHITE, 0, 0);
+            pushchk("C.OPEN", cacnel->open, FC_WHITE, 0, 0);
+            pushchk("C.HIGH", cacnel->high, FC_WHITE, 0, 0);
+            pushchk("C.LOW", cacnel->low, FC_WHITE, 0, 0);
             break;
         }
         /*************************************************************************/
@@ -452,187 +463,59 @@ int update(void *qptr, int what, int push, int seqn)
         char tmpb[40];
         char str_ymd[20];
         char str_hms[20];
+        char styp_str[256];
 
         if (!push)
-            str2fld("oNAME", mstr->enam);
+            str2fld("oNAME", mstr->symb_desc);
 
-        xdiv = mstr->xdiv;
-        ydiv = mstr->ydiv;
+        main_f = mstr->main_f;
+        sub_f = mstr->sub_f;
         zdiv = mstr->zdiv;
         sprintf(form, "%%'.%df", mstr->zdiv);
 
-        pushstr("SYMB", mstr->symb, FC_WHITE, push, seqn);
-        pushstr("SCID", mstr->scid, FC_WHITE, push, seqn);
-        pushint("SEQN", mstr->seqn, FC_WHITE, push, seqn);
-        pushstr("ROOT", mstr->root, FC_WHITE, push, seqn);
-        pushstr("CLRS", mstr->clrs, FC_WHITE, push, seqn);
-        pushstr("UNPS", mstr->unps, FC_WHITE, push, seqn);
-        pushstr("UNID", mstr->unid, FC_WHITE, push, seqn);
-        pushstr("GSYM", mstr->gsym, FC_WHITE, push, seqn);
-        pushstr("CFIC", mstr->cfic, FC_WHITE, push, seqn);
-        pushstr("CODE", mstr->code, FC_WHITE, push, seqn);
-        pushstr("ENAM", mstr->enam, FC_WHITE, push, seqn);
-        pushstr("SNAM", mstr->snam, FC_WHITE, push, seqn);
-        pushstr("INAM", mstr->inam, FC_WHITE, push, seqn);
-        pushstr("KNAM", mstr->knam, FC_WHITE, push, seqn);
-        pushstr("ECYM", mstr->ecym, FC_WHITE, push, seqn);
-        pushstr("KCYM", mstr->kcym, FC_WHITE, push, seqn);
-        pushint("EXID", mstr->exid, FC_WHITE, push, seqn);
-        pushstr("EXNM", mstr->exnm, FC_WHITE, push, seqn);
-        pushint("STAT", mstr->stat, FC_WHITE, push, seqn);
-        pushint("CMON", mstr->cmon, FC_WHITE, push, seqn);
-        switch (mstr->stat)
-        {
-        case 2:
-            pushstr("SSTR", "Trading Halt", FC_WHITE, push, seqn);
-            break;
-        case 5:
-            pushstr("SSTR", "Price Indication", FC_WHITE, push, seqn);
-            break;
-        case 17:
-            pushstr("SSTR", "Ready To Trade", FC_WHITE, push, seqn);
-            break;
-        case 18:
-            pushstr("SSTR", "End of Session", FC_WHITE, push, seqn);
-            break;
-        case 20:
-            pushstr("SSTR", "Unknown Or Invalid", FC_WHITE, push, seqn);
-            break;
-        case 21:
-            pushstr("SSTR", "Pre Open", FC_WHITE, push, seqn);
-            break;
-        case 24:
-            pushstr("SSTR", "Pre Cross", FC_WHITE, push, seqn);
-            break;
-        case 25:
-            pushstr("SSTR", "Cross", FC_WHITE, push, seqn);
-            break;
-        case 26:
-            pushstr("SSTR", "NoCancel", FC_WHITE, push, seqn);
-            break;
-        default:
-            pushstr("SSTR", "", FC_WHITE, push, seqn);
-            break;
-        }
-        pushint("UNPD", mstr->unpd, FC_WHITE, push, seqn);
-        pushflt("PMUL", mstr->pmul, FC_WHITE, push, seqn);
-        pushint("XDIV", mstr->xdiv, FC_WHITE, push, seqn);
-        pushint("YDIV", mstr->ydiv, FC_WHITE, push, seqn);
-        pushint("ZDIV", mstr->zdiv, FC_WHITE, push, seqn);
-        pushint("STYP", mstr->styp, FC_WHITE, push, seqn);
-        pushstr("CURR1", mstr->curr[0], FC_WHITE, push, seqn);
-        pushstr("CURR2", mstr->curr[1], FC_WHITE, push, seqn);
-        pushstr("CURR3", mstr->curr[2], FC_WHITE, push, seqn);
-        pushymd("EXYM", mstr->exym, FC_WHITE, push, seqn);
-        pushymd("LYMD", mstr->lymd, FC_WHITE, push, seqn);
-        pushymd("ZYMD", mstr->zymd, FC_WHITE, push, seqn);
-        pushint("JJIS", mstr->jjis, FC_WHITE, push, seqn);
-        pushymd("FTDT", mstr->ftdt, FC_WHITE, push, seqn);
-        pushymd("LTDT", mstr->ltdt, FC_WHITE, push, seqn);
-        pushymd("FNDT", mstr->fndt, FC_WHITE, push, seqn);
-        pushymd("LNDT", mstr->lndt, FC_WHITE, push, seqn);
-        pushymd("FDDT", mstr->fddt, FC_WHITE, push, seqn);
-        pushymd("LDDT", mstr->lddt, FC_WHITE, push, seqn);
-        pushstr("FLMY", mstr->flmy, FC_WHITE, push, seqn);
-        pushstr("SLMY", mstr->slmy, FC_WHITE, push, seqn);
-        pushint("MINV", mstr->minv, FC_WHITE, push, seqn);
-        pushint("MAXV", mstr->maxv, FC_WHITE, push, seqn);
-        pushint("CSIZ", mstr->csiz, FC_WHITE, push, seqn);
-        pushint("CDIV", mstr->cdiv, FC_WHITE, push, seqn);
-        pushprc("UPLP", mstr->uplp, FC_WHITE, push, seqn);
-        pushprc("DNLP", mstr->dnlp, FC_WHITE, push, seqn);
-        pushprc("PINC", mstr->pinc, FC_WHITE, push, seqn);
-        pushprc("BASE", mstr->base, FC_WHITE, push, seqn);
-        pushprc("CLOS", mstr->clos, FC_WHITE, push, seqn);
-        pushstr("TZ", fep->xchg->TZ, FC_WHITE, push, seqn);
-        pushstr("VTCK", mstr->vtck, FC_WHITE, push, seqn);
-        pushstr("PIND", mstr->pind, FC_WHITE, push, seqn);
-        pushint("CVOL", mstr->cvol, FC_WHITE, push, seqn);
-        pushint("NDPT", mstr->ndpt[0], FC_WHITE, push, seqn);
-        pushint("IDPT", mstr->ndpt[1], FC_WHITE, push, seqn);
-        pushymd("P.SYMD", mstr->prev.symd, FC_WHITE, push, seqn);
-        pushymd("P.PYMD", mstr->prev.pymd, FC_WHITE, push, seqn);
-        if (mstr->prev.symd != 0)
-            pushany("P.SETP", mstr->prev.setp, FC_WHITE, push, seqn);
-        else
-            pushprc("P.SETP", mstr->prev.setp, FC_WHITE, push, seqn);
-        if (mstr->prev.pymd != 0)
-            pushany("P.BASE", mstr->prev.base, FC_WHITE, push, seqn);
-        else
-            pushprc("P.BASE", mstr->prev.base, FC_WHITE, push, seqn);
-        base = mstr->prev.base;
-        pushchk("P.OPEN", mstr->prev.open, FC_WHITE, push, seqn);
-        pushchk("P.HIGH", mstr->prev.high, FC_WHITE, push, seqn);
-        pushchk("P.LOW", mstr->prev.low, FC_WHITE, push, seqn);
-        pushchk("P.LAST", mstr->prev.last, FC_WHITE, push, seqn);
-        pushint("P.SIGN", mstr->prev.sign, FC_WHITE, push, seqn);
-        pushdif("P.DIFF", mstr->prev.diff, FC_WHITE, push, seqn);
-        pushrat("P.RATE", mstr->prev.rate, FC_WHITE, push, seqn);
-        pushint("P.TVOL", mstr->prev.tvol, FC_WHITE, push, seqn);
-        pushint("P.OPIN", mstr->prev.opin, FC_WHITE, push, seqn);
-        pushint("SFLG", mstr->sflg, FC_WHITE, push, seqn);
+        pushstr("MSTR_SYMB", mstr->symb, FC_WHITE, push, seqn);
+        pushstr("MSTR_DESC", mstr->symb_desc, FC_WHITE, push, seqn);
+        pushstr("MSTR_ROOT", mstr->root, FC_WHITE, push, seqn);
+        pushstr("MSTR_EXCH", mstr->exch_code, FC_WHITE, push, seqn);
+        pushstr("MSTR_ISIN", mstr->isin, FC_WHITE, push, seqn);
+        pushstr("MSTR_SEDO", mstr->sedo, FC_WHITE, push, seqn);
+        pushstr("MSTR_CURR", mstr->curr, FC_WHITE, push, seqn);
+        pushstr("MSTR_PROD", mstr->prod, FC_WHITE, push, seqn);
+        pushstr("MSTR_OTYP", mstr->otyp, FC_WHITE, push, seqn);
+        pushprc("MSTR_STRP", mstr->strp, FC_WHITE, push, seqn);
+        pushstr("MSTR_STCU", mstr->stcu, FC_WHITE, push, seqn);
+        pushstr("MSTR_UCOD", mstr->ucod, FC_WHITE, push, seqn);
+        pushint("MSTR_OINT", mstr->oint, FC_WHITE, push, seqn);
+        pushint("MSTR_CVOL", mstr->cvol, FC_WHITE, push, seqn);
+        pushstr("MSTR_FLSM", mstr->flsm, FC_WHITE, push, seqn);
+        pushstr("MSTR_SLSM", mstr->slsm, FC_WHITE, push, seqn);
+        pushymd("MSTR_FLMY", mstr->flmy * 100, FC_WHITE, push, seqn);
+        pushymd("MSTR_SLMY", mstr->slmy * 100, FC_WHITE, push, seqn);
+        pushstr("MSTR_LEGS", mstr->legs, FC_WHITE, push, seqn);
+
+        get_styp(mstr->styp, styp_str);
+        pushstr("MSTR_STYP", styp_str, FC_WHITE, push, seqn);
+
+        pushymd("MSTR_FTDT", mstr->ftdt, FC_WHITE, push, seqn);
+        pushymd("MSTR_LTDT", mstr->ltdt, FC_WHITE, push, seqn);
+        pushymd("MSTR_FDDT", mstr->fddt, FC_WHITE, push, seqn);
+        pushymd("MSTR_LDDT", mstr->fddt, FC_WHITE, push, seqn);
+        pushymd("MSTR_BSDT", mstr->bsdt, FC_WHITE, push, seqn);
+        pushymd("MSTR_PTDT", mstr->ptdt, FC_WHITE, push, seqn);
+        pushymd("MSTR_STDT", mstr->stdt, FC_WHITE, push, seqn);
+        pushprc("MSTR_LAST", mstr->last, FC_WHITE, push, seqn);
+        pushprc("MSTR_SETP", mstr->setp, FC_WHITE, push, seqn);
+        pushprc("MSTR_PINC", mstr->pinc, FC_WHITE, push, seqn);
+        pushprc("MSTR_PMUL", mstr->pmul, FC_WHITE, push, seqn);
+
         if (kst4time)
         {
-            fep_kortime(fep, mstr->prev.uymd, mstr->prev.uhms, &kymd, &khms);
-            sprintf(str_ymd, "%04d-%02d-%02d (KST)", YEAR(kymd), MONTH(kymd), MDAY(kymd));
-            sprintf(str_hms, "%02d:%02d:%02d (KST)", HOUR(khms), MINUTE(khms), SECOND(khms));
-            pushstr("P.UYMD", str_ymd, FC_WHITE, push, seqn);
-            pushstr("P.UHMS", str_hms, FC_WHITE, push, seqn);
+            pushksttime("MSTR_UTIM", mstr->updated_at, FC_WHITE, push, seqn);
         }
         else
         {
-            pushymd("P.UYMD", mstr->prev.uymd, FC_WHITE, push, seqn);
-            pushhms("P.UHMS", mstr->prev.uhms, FC_WHITE, push, seqn);
+            pushlocaltime("MSTR_UTIM", mstr->updated_at, FC_WHITE, push, seqn);
         }
-        pushint("OPTS", mstr->opts, FC_WHITE, push, seqn);
-        pushchr("CORP", mstr->corp, FC_WHITE, push, seqn);
-        pushany("STRK", mstr->strk, FC_WHITE, push, seqn);
-        sprintf(tmpb, "%s,%02d:%02d-%s,%02d:%02d",
-                wday[mstr->session.fwdy], mstr->session.frhm / 100, mstr->session.frhm % 100,
-                wday[mstr->session.twdy], mstr->session.tohm / 100, mstr->session.tohm % 100);
-        pushstr("TRHM", tmpb, FC_WHITE, push, seqn);
-        sprintf(tmpb, "%02d:%02d-%02d:%02d",
-                mstr->session.hfhm / 100, mstr->session.hfhm % 100,
-                mstr->session.hthm / 100, mstr->session.hthm % 100);
-        pushstr("HTHM", tmpb, FC_WHITE, push, seqn);
-        pushint("FEED", mstr->feed, FC_WHITE, push, seqn);
-        pushint("CHID", mstr->chid, FC_WHITE, push, seqn);
-        pushymd("PYMD", mstr->pymd, FC_WHITE, push, seqn);
-        pushymd("TYMD", mstr->tymd, FC_WHITE, push, seqn);
-        pushymd("OYMD", mstr->oymd, FC_WHITE, push, seqn);
-        pushymd("CYMD", mstr->cymd, FC_WHITE, push, seqn);
-        pushint("JCHK", mstr->jchk, FC_WHITE, push, seqn);
-        pushstr("FLSM", mstr->flsm, FC_WHITE, push, seqn);
-        pushstr("SLSM", mstr->slsm, FC_WHITE, push, seqn);
-        pushstr("RCST", mstr->rcst, FC_WHITE, push, seqn);
-        pushstr("LEGS", mstr->legs, FC_WHITE, push, seqn);
-        pushstr("PROD", mstr->prod, FC_WHITE, push, seqn);
-        pushint("XAGE", mstr->xage, FC_WHITE, push, seqn);
-        if (kst4time)
-        {
-            fep_kortime(fep, mstr->uymd, mstr->uhms, &kymd, &khms);
-            sprintf(str_ymd, "%04d-%02d-%02d (KST)", YEAR(kymd), MONTH(kymd), MDAY(kymd));
-            sprintf(str_hms, "%02d:%02d:%02d (KST)", HOUR(khms), MINUTE(khms), SECOND(khms));
-            pushstr("UYMD", str_ymd, FC_WHITE, push, seqn);
-            pushstr("UHMS", str_hms, FC_WHITE, push, seqn);
-        }
-        else
-        {
-            pushymd("UYMD", mstr->uymd, FC_WHITE, push, seqn);
-            pushhms("UHMS", mstr->uhms, FC_WHITE, push, seqn);
-        }
-        pushstr("CONV", "N/A", FC_WHITE, push, seqn);
-        pushstr("IMPV", "N/A", FC_WHITE, push, seqn);
-        pushstr("LEVG", "N/A", FC_WHITE, push, seqn);
-        pushstr("GEAR", "N/A", FC_WHITE, push, seqn);
-        pushstr("DELT", "N/A", FC_WHITE, push, seqn);
-        pushstr("GAMA", "N/A", FC_WHITE, push, seqn);
-        pushstr("VEGA", "N/A", FC_WHITE, push, seqn);
-        pushstr("TETA", "N/A", FC_WHITE, push, seqn);
-        pushstr("HI52", "N/A", FC_WHITE, push, seqn);
-        pushstr("LO52", "N/A", FC_WHITE, push, seqn);
-        pushstr("HIAN", "N/A", FC_WHITE, push, seqn);
-        pushstr("LOAN", "N/A", FC_WHITE, push, seqn);
     }
     break;
     }
@@ -918,56 +801,249 @@ static void get_status(int status_code, char *status_str)
 {
     if (strcmp(fep->exnm, "ENYS") != 0)
     {
-        sprintf(status_str, "NONE");
+        sprintf(status_str, "N/A");
         return;
     }
 
     switch (status_code)
     {
     case 0:
-        sprintf(status_str, "Resume");
+        sprintf(status_str, "Resume(%d)", status_code);
         break;
     case 1:
-        sprintf(status_str, "Trading halt");
+        sprintf(status_str, "Trading halt(%d)", status_code);
         break;
     case 2:
-        sprintf(status_str, "Opening Delay");
+        sprintf(status_str, "Opening Delay(%d)", status_code);
         break;
     case 3:
-        sprintf(status_str, "No open / No resume");
+        sprintf(status_str, "No open / No resume(%d)", status_code);
         break;
     case 5:
-        sprintf(status_str, "Early");
+        sprintf(status_str, "Early(%d)", status_code);
         break;
     case 6:
-        sprintf(status_str, "Late");
+        sprintf(status_str, "Late(%d)", status_code);
         break;
     case 10:
-        sprintf(status_str, "Short Sale Restriction Activated (Day 1)");
+        sprintf(status_str, "Short Sale Restriction Activated (Day 1)(%d)", status_code);
         break;
     case 11:
-        sprintf(status_str, "Short Sale Restriction Continued (Day 2)");
+        sprintf(status_str, "Short Sale Restriction Continued (Day 2)(%d)", status_code);
         break;
     case 12:
-        sprintf(status_str, "Short Sale Restriction Deactivated");
+        sprintf(status_str, "Short Sale Restriction Deactivated(%d)", status_code);
         break;
     case 13:
-        sprintf(status_str, "Opened");
+        sprintf(status_str, "Opened(%d)", status_code);
         break;
     case 14:
-        sprintf(status_str, "Pre-opening");
+        sprintf(status_str, "Pre-opening(%d)", status_code);
         break;
     case 15:
-        sprintf(status_str, "Closed");
+        sprintf(status_str, "Closed(%d)", status_code);
         break;
     case 17:
-        sprintf(status_str, "Price Indication");
+        sprintf(status_str, "Price Indication(%d)", status_code);
         break;
     case 18:
-        sprintf(status_str, "Pre-Opening Price Indication");
+        sprintf(status_str, "Pre-Opening Price Indication(%d)", status_code);
         break;
     default:
-        sprintf(status_str, "NONE");
+        sprintf(status_str, "N/A");
+        break;
+    }
+}
+
+static void get_styp(uint32_t styp, char *styp_str)
+{
+    if (strcmp(fep->exnm, "ENYS") != 0)
+    {
+        sprintf(styp_str, "N/A");
+        return;
+    }
+
+    switch (styp)
+    {
+    case 0:
+        sprintf(styp_str, "UNDEFINED(%d)", styp);
+        break;
+    case 256:
+        sprintf(styp_str, "EQUITY(%d)", styp);
+        break;
+    case 257:
+        sprintf(styp_str, "COMMON_STOCK(%d)", styp);
+        break;
+    case 258:
+        sprintf(styp_str, "PREFERRED_STOCK(%d)", styp);
+        break;
+    case 260:
+        sprintf(styp_str, "WARRANT(%d)", styp);
+        break;
+    case 264:
+        sprintf(styp_str, "PREMIUM(%d)", styp);
+        break;
+    case 268:
+        sprintf(styp_str, "TRUST(%d)", styp);
+        break;
+    case 270:
+        sprintf(styp_str, "RIGHT(%d)", styp);
+        break;
+    case 271:
+        sprintf(styp_str, "WARRANT_RIGHT(%d)", styp);
+        break;
+    case 512:
+        sprintf(styp_str, "INDEX(%d)", styp);
+        break;
+    case 768:
+        sprintf(styp_str, "UNIT(%d)", styp);
+        break;
+    case 1024:
+        sprintf(styp_str, "COMMODITY(%d)", styp);
+        break;
+    case 1025:
+        sprintf(styp_str, "FUTURE_SPREAD(%d)", styp);
+        break;
+    case 1280:
+        sprintf(styp_str, "FUTURE(%d)", styp);
+        break;
+    case 1290:
+        sprintf(styp_str, "FORWARD(%d)", styp);
+        break;
+    case 1306:
+        sprintf(styp_str, "SPOT(%d)", styp);
+        break;
+    case 1536:
+        sprintf(styp_str, "DEPOSITORY_RECEIPT(%d)", styp);
+        break;
+    case 2048:
+        sprintf(styp_str, "OPTION(%d)", styp);
+        break;
+    case 2049:
+        sprintf(styp_str, "OPTION SPREAD(%d)", styp);
+        break;
+    case 2304:
+        sprintf(styp_str, "EQUITY_OPTION(%d)", styp);
+        break;
+    case 2560:
+        sprintf(styp_str, "INDEX_OPTION(%d)", styp);
+        break;
+    case 2816:
+        sprintf(styp_str, "BINARY_OPTION(%d)", styp);
+        break;
+    case 3328:
+        sprintf(styp_str, "COMMERCIAL_PAPER(%d)", styp);
+        break;
+    case 3072:
+        sprintf(styp_str, "FUTURE_OPTION(%d)", styp);
+        break;
+    case 3584:
+        sprintf(styp_str, "LIMITED_PARTNERSHIP(%d)", styp);
+        break;
+    case 3840:
+        sprintf(styp_str, "NOTE(%d)", styp);
+        break;
+    case 4096:
+        sprintf(styp_str, "FIXED_INCOME(%d)", styp);
+        break;
+    case 4097:
+        sprintf(styp_str, "BOND(%d)", styp);
+        break;
+    case 4098:
+        sprintf(styp_str, "CONVERTIBLE_BOND(%d)", styp);
+        break;
+    case 4099:
+        sprintf(styp_str, "MORTGAGE_BACKED_SECURITY(%d)", styp);
+        break;
+    case 4100:
+        sprintf(styp_str, "GOV_BOND(%d)", styp);
+        break;
+    case 4104:
+        sprintf(styp_str, "CORP_BOND(%d)", styp);
+        break;
+    case 4112:
+        sprintf(styp_str, "US_AGENCY_BOND(%d)", styp);
+        break;
+    case 4128:
+        sprintf(styp_str, "TREASURY_BILL(%d)", styp);
+        break;
+    case 4160:
+        sprintf(styp_str, "US_TREASURY_COUPON(%d)", styp);
+        break;
+    case 4224:
+        sprintf(styp_str, "MONEY_MARKET(%d)", styp);
+        break;
+    case 4352:
+        sprintf(styp_str, "CD(%d)", styp);
+        break;
+    case 5000:
+        sprintf(styp_str, "STRUCTURED_PRODUCT(%d)", styp);
+        break;
+    case 8192:
+        sprintf(styp_str, "MUTUAL_FUND(%d)", styp);
+        break;
+    case 5102:
+        sprintf(styp_str, "INTEREST_RATE_SWAP(%d)", styp);
+        break;
+    case 5104:
+        sprintf(styp_str, "FX_SWAP(%d)", styp);
+        break;
+    case 5106:
+        sprintf(styp_str, "CREDIT_DEFAULT_SWAP(%d)", styp);
+        break;
+    case 5108:
+        sprintf(styp_str, "ASSET_SWAP(%d)", styp);
+        break;
+    case 5110:
+        sprintf(styp_str, "FUTURES_SWAP(%d)", styp);
+        break;
+    case 5112:
+        sprintf(styp_str, "TOTAL_RETURN_SWAP(%d)", styp);
+        break;
+    case 5194:
+        sprintf(styp_str, "SEC_144A(%d)", styp);
+        break;
+    case 8193:
+        sprintf(styp_str, "EXCHANGE_TRADED_FUND(%d)", styp);
+        break;
+    case 8194:
+        sprintf(styp_str, "EXCHANGE_TRADED_NOTE(%d)", styp);
+        break;
+    case 8196:
+        sprintf(styp_str, "CLOSED_END_FUND(%d)", styp);
+        break;
+    case 8200:
+        sprintf(styp_str, "REIT(%d)", styp);
+        break;
+    case 16384:
+        sprintf(styp_str, "FOREX(%d)", styp);
+        break;
+    case 16385:
+        sprintf(styp_str, "FOREX_FRA(%d)", styp);
+        break;
+    case 16386:
+        sprintf(styp_str, "FOREX_DEPOSIT(%d)", styp);
+        break;
+    case 17408:
+        sprintf(styp_str, "FOREX_FORWARD(%d)", styp);
+        break;
+    case 18432:
+        sprintf(styp_str, "FOREX_OPTION(%d)", styp);
+        break;
+    case 20480:
+        sprintf(styp_str, "STATISTICS(%d)", styp);
+        break;
+    case 65520:
+        sprintf(styp_str, "ADMIN(%d)", styp);
+        break;
+    case 65534:
+        sprintf(styp_str, "TEST(%d)", styp);
+        break;
+    case 65535:
+        sprintf(styp_str, "MISCELLANEOUS(%d)", styp);
+        break;
+    default:
+        sprintf(styp_str, "N/A");
         break;
     }
 }

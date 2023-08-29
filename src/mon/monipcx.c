@@ -1,9 +1,11 @@
 #include "context.h"
 
-void usage()
+char *whoami;
+
+void usage(char *who)
 {
     if (isatty(1))
-        printf("usage : monipcx exchange_name\n");
+        printf("usage : %s exchange_name\n", who);
     exit(-1);
 }
 
@@ -13,6 +15,7 @@ int confirmAction(const char *message)
 
     printf("%s [Y/N]: ", message);
     scanf("%s", answer);
+    printf("\n");
 
     switch (answer[0])
     {
@@ -23,7 +26,7 @@ int confirmAction(const char *message)
     case 'n':
         return 0;
     default:
-        printf("\n [Y/N] 중 선택하세요.\n");
+        printf("%s: [Y/N] 중 선택하세요.\n", whoami);
         return confirmAction(message);
     }
 }
@@ -33,9 +36,12 @@ int main(int argc, char **argv)
     struct shmid_ds shmid_ds;
     char exnm[32];
     int shmkey, shmid;
+    char inquiry[128];
+	
+    whoami = basename(argv[0]);
 
     if (argc < 2)
-        usage();
+        usage(whoami);
 
     strcpy(exnm, argv[1]);
 
@@ -44,7 +50,7 @@ int main(int argc, char **argv)
 
     if (shmid < 0)
     {
-        printf("'%s'에 할당된 공유메모리가 없습니다..\n");
+        printf("%s: '%s' 거래소에 할당된 공유메모리가 없습니다..\n\n", whoami, exnm);
         exit(0);
     }
 
@@ -82,11 +88,13 @@ int main(int argc, char **argv)
                shmid_ds.shm_perm.mode,
                shmid_ds.shm_perm.__seq);
 
-        if (!confirmAction("'%s' 거래소의 전체 메모리가 초기화 됩니다. 진행하시겠습니까?"))
+	sprintf(inquiry, "%s: '%s' 거래소의 공유 메모리가 삭제 됩니다. 진행하시겠습니까?", whoami, exnm);
+
+        if (!confirmAction(inquiry))
             exit(0);
             
         if (shmctl(shmid, IPC_RMID, &shmid_ds) == 0)
-            printf("'%s' 거래소의 공유 메모리가 삭제되었습니다.\n");
+            printf("%s: '%s' 거래소의 공유 메모리가 삭제되었습니다.\n", whoami, exnm);
     }
 
     return 0;

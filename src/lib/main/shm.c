@@ -87,6 +87,7 @@ int fep_shminit(FEP *fep)
         {
             return -1;
         }
+
         shmad = attachSharedMemory(shmid, 1);
         break;
 
@@ -121,7 +122,6 @@ int fep_shminit(FEP *fep)
             }
         }
         break;
-
     default:
         return -1;
     }
@@ -129,11 +129,13 @@ int fep_shminit(FEP *fep)
     fep->arch = shmad;
     fep->fold = &shmad[sizeof(MDARCH)];
 
-    arch = (MDARCH *)fep->arch;
-
-    arch->mrec = fep->config.settings.room;
-    memcpy(&arch->config, &fep->config, sizeof(CONFIG));
-
+    if (fep->whoami == MD_RDWR)
+    {
+        arch = (MDARCH *)fep->arch;
+        arch->mrec = fep->config.settings.room;
+        memcpy(&arch->config, &fep->config, sizeof(CONFIG));
+    }
+    
     fep_log(fep, FL_MUST, GET_CALLER_FUNCTION(),
             "\n\n--- [%s] Shared Memory Info ---\n"
             "- Segment Size: %lu bytes\n"

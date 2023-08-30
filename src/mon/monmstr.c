@@ -1,9 +1,9 @@
-#include "main.h"
+#include "context.h"
 
 void usage(const char *who)
 {
     if (isatty(1))
-        printf("usage : %s exchange_name\n", who);
+        printf("usage : %s <exchange_name> <hostname>\n", who);
 
     exit(1);
 }
@@ -13,9 +13,10 @@ int main(int argc, char **argv)
     FEP *fep = NULL;
     char *whoami;
     char exnm[32];
-    MDARCH *arch;
-    int ii;
-    FOLDER *fold;
+    char hostname[32];
+    MDARCH *mdarch;
+    int ii, jj = 0;
+    FOLDER *folder;
     MDMSTR *mstr;
 
     whoami = basename(argv[0]);
@@ -25,6 +26,9 @@ int main(int argc, char **argv)
 
     strcpy(exnm, argv[1]);
 
+    if (argc == 3)
+        strcpy(hostname, argv[2]);
+
     fep = fep_open(exnm, MD_RDONLY);
 
     if (fep == NULL)
@@ -33,31 +37,35 @@ int main(int argc, char **argv)
         return (0);
     }
 
-    arch = (MDARCH *)fep->arch;
-    fold = (FOLDER *)fep->fold;
+    mdarch = (MDARCH *)fep->arch;
+    folder = (FOLDER *)fep->fold;
 
-    printf("############## %s ##############\n", exnm);
+    printf("############## %s ##############\n", fep->exnm);
     printf("MAX[%d] COUNT[%d]\n", mdarch->mrec, mdarch->vrec);
 
-    for (ii = 0; ii < arch->vrec;)
+    for (ii = 0; ii < mdarch->vrec; ii++)
     {
         mstr = &folder[ii].mstr;
 
-        printf("[%6d] ", ii);
-        printf("symb[%.*s] ", sizeof(mstr->symb), mstr->symb);
-        printf("root[%.*s] ", sizeof(mstr->root), mstr->root);
-        printf("desc[%.*s] ", sizeof(mstr->symb_desc), mstr->symb_desc);
-        printf("exch[%.*s] ", sizeof(mstr->exch_code), mstr->exch_code);
-        printf("curr[%.*s] ", sizeof(mstr->curr), mstr->curr);
+        if((strlen(hostname) > 0 && strcmp(hostname, folder[ii].hostname) != 0))
+            continue;
+
+        printf("[%6d] ", jj++);
+        printf("host[%.*s] ", strlen(folder[ii].hostname), folder[ii].hostname);
+        printf("symb[%.*s] ", strlen(mstr->symb), mstr->symb);
+        printf("root[%.*s] ", strlen(mstr->root), mstr->root);
+        printf("desc[%.*s] ", strlen(mstr->symb_desc), mstr->symb_desc);
+        printf("exch[%.*s] ", strlen(mstr->exch_code), mstr->exch_code);
+        printf("curr[%.*s] ", strlen(mstr->curr), mstr->curr);
         printf("ftdt[%d] ", mstr->ftdt);
         printf("ltdt[%d] ", mstr->ltdt);
         printf("lddt[%d] ", mstr->lddt);
         printf("bsdt[%d] ", mstr->bsdt);
         printf("stdt[%d] ", mstr->stdt);
-        printf("setp[%.*g] ", mstr->zdiv, mstr->setp);
-        printf("pinc[%.*g] ", mstr->zdiv, mstr->pinc);
-        printf("pmul[%.*g] ", mstr->zdiv, mstr->pmul);
-        printf("update[%s] ", ctime(mstr->updated_at));
+        printf("setp[%f] ", mstr->setp);
+        printf("pinc[%f] ", mstr->pinc);
+        printf("pmul[%f] ", mstr->pmul);
+        printf("update[%s] ", ctime(&mstr->updated_at));
         printf("\n");
     }
 

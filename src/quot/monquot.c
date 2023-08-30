@@ -22,7 +22,7 @@ char i_host[8], s_host[8];
 char s_path[128];
 char g_scrn[8] = "000";
 char g_symb[64];
-char g_host[8];
+char g_host[8] = "CME20";
 
 int enable_pgup = 0;
 int enable_pgdn = 0;
@@ -39,9 +39,9 @@ struct field form4hd[] = {
     {FT_OUTPUT, "", 1, 1, 0, "", FA_BOLD | FC_YELLOW, -1, 0},
     {FT_OUTPUT, "", 2, 1, 0, "Choice ", FA_BOLD | FC_YELLOW, -1, 0},
     {FT_INPUT, "iSCRN", 2, 9, 3, "", FA_BOLD | FC_YELLOW, -1, 0},
-    {FT_INPUT, "iEXCH", 2, 13, 4, "", FA_BOLD | FC_YELLOW, -1, 0},
-    {FT_INPUT, "iHOST", 2, 18, 8, "", FA_BOLD | FC_YELLOW, -1, 0},
-    {FT_INPUT, "iSYMB", 2, 27, 32, "", FA_BOLD | FC_YELLOW, -1, 0},
+    {FT_INPUT, "iHOST", 2, 13, 6, "", FA_BOLD | FC_YELLOW, -1, 0},
+    {FT_INPUT, "iEXCH", 2, 20, 4, "", FA_BOLD | FC_YELLOW, -1, 0},
+    {FT_INPUT, "iSYMB", 2, 25, 32, "", FA_BOLD | FC_YELLOW, -1, 0},
     {FT_OUTPUT, "oNAME", 2, 60, 128, "", FA_BOLD | FC_YELLOW, -1, FLD_IS_LEFT},
     {-1, "", 0, 0, 0, "", 0, -1, 0}};
 
@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
     mapopen((char *)g_scrn);
     str2fld("iSCRN", g_scrn);
     str2fld("iEXCH", "FCME");
-    str2fld("iHOST", "CME20");
+    str2fld("iHOST", g_host);
 
     while (1)
     {
@@ -190,6 +190,7 @@ int main(int argc, char *argv[])
 int doaction(int key)
 {
     FEP *fep;
+    char guide[128];
 
     pthread_mutex_lock(&real_lock);
     clrguide();
@@ -224,7 +225,8 @@ int doaction(int key)
 
     if (fep == NULL)
     {
-        setguide("Invalid Exchange !!!!");
+        sprintf(guide, "'%s' is invalid exchange !!!", s_exch);
+        setguide(guide);
         pthread_mutex_unlock(&real_lock);
         return (0);
     }

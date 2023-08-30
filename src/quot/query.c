@@ -120,7 +120,7 @@ static int getfep()
 		setguide(errmsg);
 		return (-1);
 	}
-
+	
 	return (0);
 }
 

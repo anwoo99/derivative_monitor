@@ -15,9 +15,9 @@ static struct svctbl
 	char scrn[4];  // screen number
 	int (*proc)(); // procedures
 } svctbl[] = {
-	{100, "100", query4list},	 // quote board
-	{200, "200", query4symb},	 // quote composite
-	{201, "201", query4symb},	 // master information
+	{100, "100", query4list}, // quote board
+	{200, "200", query4symb}, // quote composite
+	{201, "201", query4symb}, // master information
 	{-1, "", NULL},
 };
 
@@ -120,7 +120,7 @@ static int getfep()
 		setguide(errmsg);
 		return (-1);
 	}
-	
+
 	return (0);
 }
 
@@ -228,7 +228,8 @@ static int query4list(int key, int qform)
 	int indx;
 	char buff[128];
 	int ii;
-	int min_indx = 0, max_indx = 0;
+	int min_indx, max_indx;
+	char log[123];
 
 	enable_pgup = 0;
 	enable_pgdn = 0;
@@ -263,6 +264,9 @@ static int query4list(int key, int qform)
 
 	fold = fep->fold;
 
+	min_indx = 0;
+	max_indx = mdarch->vrec - 1;
+
 	for (ii = 0; ii < mdarch->vrec; ii++)
 	{
 		if (ii == 0)
@@ -281,9 +285,9 @@ static int query4list(int key, int qform)
 
 		if (strcmp(fold[ii].hostname, fold[ii + 1].hostname) != 0)
 		{
-			if(strcmp(fold[ii + 1].hostname, s_host) == 0)
+			if (strcmp(fold[ii + 1].hostname, s_host) == 0)
 				min_indx = ii;
-			else if(strcmp(fold[ii].hostname, s_host) == 0)
+			else if (strcmp(fold[ii].hostname, s_host) == 0)
 				max_indx = ii;
 			continue;
 		}

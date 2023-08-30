@@ -134,9 +134,9 @@ int fep_shminit(FEP *fep)
         arch = (MDARCH *)fep->arch;
         arch->mrec = fep->config.settings.room;
         memcpy(&arch->config, &fep->config, sizeof(CONFIG));
-    }
     
-    fep_log(fep, FL_MUST, GET_CALLER_FUNCTION(),
+    
+    	fep_log(fep, FL_MUST, GET_CALLER_FUNCTION(),
             "\n\n--- [%s] Shared Memory Info ---\n"
             "- Segment Size: %lu bytes\n"
             "- Last Access Time: %s"
@@ -168,6 +168,6 @@ int fep_shminit(FEP *fep)
             shmid_ds.shm_perm.cgid,
             shmid_ds.shm_perm.mode,
             shmid_ds.shm_perm.__seq);
-
+    }
     return 0;
 }

@@ -561,23 +561,23 @@ static void pushhms(char *name, int hms, int color, int push, int seqn)
     pushstr(name, fldb, color, push, seqn);
 }
 
-static void pushksttime(char *name, time_t time, int color, int push, int seqn)
+static void pushksttime(char *name, time_t time_info, int color, int push, int seqn)
 {
-    char fldb[256];
+    char fldb[1024], time_str[1024];
     time_t korean_time;
     struct tm korean_tm;
 
-    fep_utc2kst(time, &korean_time, &korean_tm);
-    ctime_r(&korean_time, fldb);
-    sprintf(fldb, "%s (KST)", fldb);
+    fep_utc2kst(time_info, &korean_time, &korean_tm);
+    ctime_r(&korean_time, time_str);
+    sprintf(fldb, "%d (KST)", korean_tm.tm_year);
     pushstr(name, fldb, color, push, seqn);
 }
 
-static void pushlocaltime(char *name, time_t time, int color, int push, int seqn)
+static void pushlocaltime(char *name, time_t time_info, int color, int push, int seqn)
 {
-    char fldb[256];
+    char fldb[1024];
 
-    ctime_r(time, fldb);
+    ctime_r(&time_info, fldb);
     pushstr(name, fldb, color, push, seqn);
 }
 

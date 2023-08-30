@@ -22,7 +22,7 @@ char i_host[8], s_host[8];
 char s_path[128];
 char g_scrn[8] = "000";
 char g_symb[64];
-char g_host[8] = "CME20";
+char g_host[8] = "CMEDEV";
 
 int enable_pgup = 0;
 int enable_pgdn = 0;

@@ -9,7 +9,7 @@ void fep_log(FEP *fep, int level, const char *caller_function, const char *forma
     struct stat lstat;
     char logmsg[1024 * 8];
     FILE *logF;
-
+    
     if (level > fep->config.settings.logLevel)
         return;
 
@@ -34,8 +34,12 @@ void fep_log(FEP *fep, int level, const char *caller_function, const char *forma
     va_end(vl);
 
     logF = fopen(logpath, mode);
+    
     if (!logF)
+    {
+        printf("Failed..!(%s)\n", strerror(errno));
         return;
+    }
 
     if (level != FL_ERROR)
         fprintf(logF, "%s\n", logmsg);
@@ -118,7 +122,7 @@ void quote_log(FEP *fep, char *hostname, int class_tag, const char *format, ...)
     char trxc[32];
     FILE *logF;
 
-    korean_time = time(NULL);
+    current = time(NULL);
     fep_utc2kst(current, &korean_time, &korean_tm);
 
     _trans_trxc(class_tag, trxc);

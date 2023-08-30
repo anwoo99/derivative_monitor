@@ -29,11 +29,67 @@ int mon_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *class_tag)
     return (0);
 }
 
-int empty_alert(FEP *fep, PORT *port, char *msgb, char *field_buffer, char *field_name, int send_flag)
+int STR2STR(char *to, char *from, int size)
+{
+    if (to == NULL || from == NULL || size <= 0)
+        return (-1);
+
+    memcpy(to, from, size);
+    to[size] = '\0';
+
+    return (0);
+}
+
+int STR2INT(int *to, char *from, int size)
+{
+    char temp[size + 1];
+
+    if (to == NULL || from == NULL || size <= 0)
+        return (-1);
+
+    STR2STR(temp, from, size);
+
+    *to = atoi(temp);
+
+    return (0);
+}
+
+int STR2UINT(uint32_t *to, char *from, int size)
+{
+    char temp[size + 1];
+
+    if (to == NULL || from == NULL || size <= 0)
+        return (-1);
+
+    STR2STR(temp, from, size);
+
+    *to = atoi(temp);
+
+    return (0);
+}
+
+int STR2FLOAT(double *to, char *from, int size)
+{
+    char temp[size + 1];
+
+    if (to == NULL || from == NULL || size <= 0)
+        return (-1);
+
+    STR2STR(temp, from, size);
+
+    *to = atof(temp);
+
+    return (0);
+}
+
+int empty_alert(FEP *fep, PORT *port, char *msgb, char *field_buffer, int field_size, char *field_name, int send_flag)
 {
     char message[1024];
+    char variable[1024];
 
-    if (strlen(field_buffer) <= 0)
+    STR2STR(variable, field_buffer, field_size);
+
+    if (strlen(variable) <= 0)
     {
         sprintf(message, "'%s' field empty..! | [%s]", field_name, msgb);
         mon_send_cmefnd(fep, port, message, send_flag);
@@ -43,13 +99,16 @@ int empty_alert(FEP *fep, PORT *port, char *msgb, char *field_buffer, char *fiel
     return (0);
 }
 
-int exch_alert(FEP *fep, PORT *port, char *msgb, char *field_buffer, int send_flag)
+int exch_alert(FEP *fep, PORT *port, char *msgb, char *field_buffer, int field_size, int send_flag)
 {
     char message[1024];
+    char variable[1024];
     int exch_id = 0;
     int error = 0;
 
-    exch_id = atoi(&field_buffer[1]);
+    STR2STR(variable, field_buffer, field_size);
+
+    exch_id = atoi(&variable[1]);
 
     switch (exch_id)
     {
@@ -128,12 +187,12 @@ int exch_alert(FEP *fep, PORT *port, char *msgb, char *field_buffer, int send_fl
 
     if (error == -1)
     {
-        sprintf(message, "'exch' field(%s) mismatch..! | [%s]", field_buffer, msgb);
+        sprintf(message, "'exch' field(%s) mismatch..! | [%s]", variable, msgb);
         mon_send_cmefnd(fep, port, message, send_flag);
     }
     else if (error == -2)
     {
-        sprintf(message, "'exch' field(%s) unknwon..! | [%s]", field_buffer, msgb);
+        sprintf(message, "'exch' field(%s) unknwon..! | [%s]", variable, msgb);
         mon_send_cmefnd(fep, port, message, send_flag);
     }
 
@@ -187,9 +246,12 @@ int cross_check(FEP *fep, PORT *port, MDDEPT *depth, int send_flag)
     }
 }
 
-int parse_pind(MDMSTR *mstr, char *pind)
+int parse_pind(MDMSTR *mstr, char *buffer, int size)
 {
     int number;
+    char pind[32];
+
+    STR2STR(pind, buffer, size);
 
     switch (pind[0])
     {

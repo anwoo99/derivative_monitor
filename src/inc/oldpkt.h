@@ -76,7 +76,7 @@ typedef struct
 typedef struct
 {
     char code[16]; /* Market symbol code                   */
-    char ticd[8];  /* Commodity(Ticke) code                */
+    char ticd[8];  /* Commodity(Ticker) code               */
     char enam[40]; /* Market symbol name                   */
     char exch[3];  /* Exchange section                     */
     char curr[3];  /* currency code                        */

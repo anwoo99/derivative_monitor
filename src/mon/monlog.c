@@ -147,6 +147,7 @@ int mon_log_remove(FEP *fep, char *logdir, int date_limit)
         }
     }
 
+    closedir(dir);
     return (0);
 }
 
@@ -171,7 +172,10 @@ int mon_log(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *class_tag)
 
     /* Make Log Path */
     if (-1 == mon_log_path(fep, port, class_tag, logdir, filename))
+    {
+        fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "Failed to get log path");
         return (-1);
+    }
 
     memset(logpath, 0x00, sizeof(logpath));
     sprintf(logpath, "%s/%s", logdir, filename);
@@ -191,7 +195,10 @@ int mon_log(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *class_tag)
         max_date = raw_data->max_date;
 
     if (-1 == mon_log_remove(fep, logdir, max_date))
+    {
+        fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "Failed to remove the old log in '%s'", logdir);
         return (-1);
+    }
 
     return (0);
 }

@@ -25,6 +25,8 @@ typedef struct
     int flag;
     int mrec;
     int vrec;
+    int mstr_update[MAX_PORT];
+    int mstr_flag;
 } MDARCH;
 
 unsigned long djb2(const char *str);

@@ -53,8 +53,9 @@ FOLDER *newfolder(FEP *fep, const char *symb, const char *hostname)
     }
 
     folder = fep->fold;
-;
+
     memset(&f, 0x00, sizeof(f));
+
     strcpy(f.symb, symb);
     strcpy(f.hostname, hostname);
     strcpy(f.mstr.symb, symb);

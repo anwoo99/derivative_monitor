@@ -198,6 +198,8 @@ void recv_to_send(void *argv)
     while (1)
     {
         slen = sizeof(sockin);
+        memset(msgb, 0x00, sizeof(msgb));
+
         msgl = recvfrom(port->sock, msgb, sizeof(msgb), 0, (struct sockaddr *)&sockin, &slen);
 
         null_to_space(msgb, msgl);

@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 
         recvctx[ii].seqn = ii;
         recvctx[ii].fep = fep;
-        
+
         fep_log(fep, FL_MUST, GET_CALLER_FUNCTION(), "%s_%s_%s process start..!", fep->exnm, fep->config.ports[ii].host, fep->config.ports[ii].name);
 
         pthread_create(&recvctx[ii].thread, NULL, recv_to_fep, &recvctx[ii]);
@@ -119,6 +119,7 @@ void recv_to_fep(void *argv)
     RECVCTX *recvctx = argv;
     int seqn = recvctx->seqn;
     FEP *fep = recvctx->fep;
+    MDARCH *arch = (MDARCH *)fep->arch;
     PORT *port = &fep->config.ports[seqn];
     int domain_socket;
     struct sockaddr_un sender;
@@ -132,9 +133,14 @@ void recv_to_fep(void *argv)
         pthread_exit(NULL);
     }
 
+    memset(&arch->mstr_update[port->seqn], 0x00, sizeof(int));
+    arch->mstr_flag = 0;
+
     while (1)
     {
         sender_len = sizeof(sender);
+        memset(msgb, 0x00, sizeof(msgb));
+
         msgl = recvfrom(domain_socket, msgb, sizeof(msgb), 0, (struct sockaddr *)&sender, &sender_len);
 
         if (msgl < 0)
@@ -149,7 +155,10 @@ void recv_to_fep(void *argv)
         else
         {
             if (-1 == main_process(fep, port, msgb, msgl))
+            {
+                fep_log(fep, FL_ERROR, GET_CALLER_FUNCTION(), "Main Process for '%s' is dead..", port->ipc_name);
                 break;
+            }
         }
     }
 
@@ -160,10 +169,26 @@ void recv_to_fep(void *argv)
 int main_process(FEP *fep, PORT *port, char *msgb, int msgl)
 {
     uint32_t class_tag = 0x00;
+    MDARCH *arch = (MDARCH *)fep->arch;
 
     /* 데이터 분류 태그 */
     if (-1 == mon_classify(fep, port, msgb, &class_tag))
         return (0);
+
+    /* 마스터 포트인 경우 mstr_flag ON/OFF */
+    if (strcmp(port->type, "M") == 0)
+    {
+        if (arch->mstr_update[port->seqn] == 0 && (class_tag & MASTER))
+        {
+            arch->mstr_update[port->seqn] = 1;
+            arch->mstr_flag++;
+        }
+        else if (arch->mstr_update[port->seqn] == 1 && (class_tag & NONE))
+        {
+            arch->mstr_update[port->seqn] = 0;
+            arch->mstr_flag--;
+        }
+    }
 
     /* 데이터 수신 여부 체크 후 Alert -> NaverWorks */
     if (-1 == mon_recv_check(fep, port, &class_tag))
@@ -179,7 +204,9 @@ int main_process(FEP *fep, PORT *port, char *msgb, int msgl)
 
     /* 데이터 정합성 검사 & 매핑 => folder */
     if (-1 == mon_map(fep, port, msgb, msgl, &class_tag))
+    {
         return (-1);
+    }
 
     return (0);
 }

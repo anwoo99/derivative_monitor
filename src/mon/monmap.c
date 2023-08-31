@@ -31,7 +31,7 @@ int mon_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *class_tag)
 
 int STR2STR(char *to, char *from, int size)
 {
-    int ii;
+    int i;
     
     if (to == NULL || from == NULL || size <= 0)
         return (-1);

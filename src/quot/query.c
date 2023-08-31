@@ -158,7 +158,7 @@ static int query4symb(int key, int qform)
 		return (-1);
 	}
 	cur2fld("iSYMB");
-
+	
 	folder = getfolder(fep, s_symb, s_host);
 
 	if (folder == NULL)

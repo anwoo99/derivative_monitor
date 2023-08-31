@@ -75,14 +75,7 @@ int update(void *qptr, int what, int push, int seqn)
         pushchk("LAST", quot->last, FC_WHITE, push, seqn);
         pushlng("TVOL", quot->tvol, FC_WHITE, push, seqn);
 
-        if (kst4time)
-        {
-            pushksttime("QUOT_UTIM", quot->updated_at, FC_WHITE, push, seqn); // 업데이트 시각
-        }
-        else
-        {
-            pushlocaltime("QUOT_UTIM", quot->updated_at, FC_WHITE, push, seqn); // 업데이트 시각
-        }
+	pushksttime("QUOT_UTIM", quot->updated_at, FC_WHITE, push, seqn); // 업데이트 시각
 
         if (!push)
             rqsymb(fep->exnm, quot->symb, fold->hostname, PUSH_QUOT, seqn);
@@ -260,11 +253,11 @@ int update(void *qptr, int what, int push, int seqn)
 
             if (kst4time)
             {
-                pushksttime("SETT_UTIM", close->updated_at, FC_WHITE, push, seqn); // 업데이트 시각
+                pushksttime("CLOS_UTIM", close->updated_at, FC_WHITE, push, seqn); // 업데이트 시각
             }
             else
             {
-                pushlocaltime("SETT_UTIM", close->updated_at, FC_WHITE, push, seqn); // 업데이트 시각
+                pushlocaltime("CLOS_UTIM", close->updated_at, FC_WHITE, push, seqn); // 업데이트 시각
             }
             /*************************************************************************/
 
@@ -568,16 +561,18 @@ static void pushksttime(char *name, time_t time_info, int color, int push, int s
     struct tm korean_tm;
 
     fep_utc2kst(time_info, &korean_time, &korean_tm);
-    ctime_r(&korean_time, time_str);
-    sprintf(fldb, "%d (KST)", korean_tm.tm_year);
+    sprintf(fldb, "%d-%02d-%02d %02d:%02d:%02d (KST)", korean_tm.tm_year + 1900, korean_tm.tm_mon + 1, korean_tm.tm_mday, korean_tm.tm_hour, korean_tm.tm_min, korean_tm.tm_sec);
     pushstr(name, fldb, color, push, seqn);
 }
 
 static void pushlocaltime(char *name, time_t time_info, int color, int push, int seqn)
 {
     char fldb[1024];
+    struct tm _tm;
 
-    ctime_r(&time_info, fldb);
+    localtime_r(&time_info, &_tm);
+
+    sprintf(fldb, "%d-%02d-%02d %02d:%02d:%02d", _tm.tm_year + 1900, _tm.tm_mon + 1, _tm.tm_mday, _tm.tm_hour, _tm.tm_min, _tm.tm_sec);
     pushstr(name, fldb, color, push, seqn);
 }
 

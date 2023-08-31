@@ -171,11 +171,15 @@ int main(int argc, char *argv[])
                 display10 = 1;
             doaction(K_ENTER);
             break;
-        case 0x14: // ^T
+        case 0x14: // ^T 
             if (kst4time)
+	    {
                 kst4time = 0;
+	    }
             else
+	    {
                 kst4time = 1;
+	    }
             doaction(K_ENTER);
             break;
         default:

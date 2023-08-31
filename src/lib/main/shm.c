@@ -128,7 +128,7 @@ int fep_shminit(FEP *fep)
 
     fep->arch = shmad;
     fep->fold = &shmad[sizeof(MDARCH)];
-
+    
     if (fep->whoami == MD_RDWR)
     {
         arch = (MDARCH *)fep->arch;

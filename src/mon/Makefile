@@ -10,7 +10,7 @@ LFLAGS=$(MY_LFLAGS) -L../lib/main -lMAIN -lm
 AFLAGS=$(MY_AFLAGS)
 
 INCF=../inc/main.h ../inc/context.h ../inc/config.h ../inc/parson.h ../inc/schema.h ../inc/extpkt.h ../inc/oldpkt.h
-CMD=monrecv monfep monipcx monmstr
+CMD=monrecv monfep monipcx monmstr monserver moninit
 OBJF=monfep.o monlog.o monclass.o moncheck.o monsend.o monmap.o oldmap.o extmap.o
 
 # Default Rules:
@@ -38,9 +38,14 @@ monmstr: monmstr.o $(INCF)
 monipcx: monipcx.o $(INCF)
 	$(CC) -o monipcx monipcx.o $(LFLAGS)
 
+monserver: monserver.o $(INCF)
+	$(CC) -o monserver monserver.o $(LFLAGS)
+moninit: monserver.o $(INCF)
+	$(CC) -o moninit monserver.o $(LFLAGS)
+
 monrecv: monrecv.o $(INCF)
-	$(CC) -o monrecv monrecv.o $(LFLAGS)
-	
+	$(CC) -o monrecv monrecv.o $(LFLAGS)	
+
 monfep: $(OBJF) $(INCF)
 	$(CC) -o monfep $(OBJF) $(LFLAGS)
 

@@ -17,6 +17,7 @@ typedef struct
 {
     char exchange[128];
     char procname[512];
+    char command[512];
     pid_t pid;
     time_t uptime;
 } RUNNING_TABLE;
@@ -35,13 +36,102 @@ char COMMAND1[512] = "monrecv";
 char COMMAND2[512] = "monfep";
 pthread_mutex_t lock;
 
+RUNNING_TABLE *get_running_table(char *exnm, char *procname);
+RUNNING_TABLE *new_running_table(char *exnm, char *procname);
+void del_running_table(char *exnm, char *procname);
+void kill_all_process();
+int run_all_process();
+int check_all_process();
+int create_named_pipe(char *pipe);
+int send_named_pipe(char *pipe, char *msg);
+void read_named_pipe(void *argv);
+void clean_zombie_process(int signo);
 void writelog(const char *format, ...);
 int get_process_config();
 
-int main()
+void send_flag(int flag)
+{
+    switch (flag)
+    {
+    case _KILL_ALL:
+        if (-1 == send_named_pipe(RECV_PIPE, KILL_ALL_MSG))
+        {
+            printf("Failed to send kill message: %s\n", strerror(errno));
+            exit(0);
+        }
+        break;
+    case _CONFIG_UPDATE:
+        if (-1 == send_named_pipe(RECV_PIPE, CONFIG_UPDATE_MSG))
+        {
+            printf("Failed to send update message: %s\n", strerror(errno));
+            exit(0);
+        }
+        break;
+    case _RUN_ALL:
+        if (-1 == send_named_pipe(RECV_PIPE, RUN_ALL_MSG))
+        {
+            printf("Failed to send run message: %s\n", strerror(errno));
+            exit(0);
+        }
+        break;
+    }
+}
+
+void usage(char *who)
+{
+    printf("Usage: %s [options]\n", who);
+    printf("Options:\n");
+    printf("  -k    Kill all processes\n");
+    printf("  -s    Run all processes\n");
+    printf("  --help  Display this help message\n");
+
+    exit(0);
+}
+
+int main(int argc, char **argv)
 {
     pthread_t thread;
-    int result;
+    char *whoami;
+    int option;
+
+    whoami = basename(argv[0]);
+
+    sprintf(RECV_PIPE, "%s/RECV_PIPE", TMP_DIR);
+    sprintf(SEND_PIPE, "%s/SEND_PIPE", TMP_DIR);
+
+    if (strcmp(whoami, "moninit") == 0)
+    {
+        if (argc == 1)
+        {
+            send_flag(_CONFIG_UPDATE);
+            return (0);
+        }
+
+        if (argc == 2)
+        {
+            if (strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "-h") == 0)
+            {
+                usage(whoami);
+            }
+        }
+
+        while ((option = getopt(argc, argv, "ks")) != -1)
+        {
+            switch (option)
+            {
+            case 'k':
+                send_flag(_KILL_ALL);
+                break;
+            case 's':
+                send_flag(_RUN_ALL);
+                break;
+            default:
+                usage(whoami);
+                break;
+            }
+        }
+        return (0);
+    }
 
     writelog("Main server for monitor start..!");
 
@@ -51,7 +141,10 @@ int main()
     if (-1 == get_process_config())
         return (-1);
 
-    if (-1 == create_named_pipe())
+    if (-1 == create_named_pipe(RECV_PIPE))
+        return (-1);
+
+    if (-1 == create_named_pipe(SEND_PIPE))
         return (-1);
 
     if (-1 == run_all_process())
@@ -63,7 +156,7 @@ int main()
     signal(SIGINT, exit);
     signal(SIGCHLD, clean_zombie_process);
 
-    pthread_mutex_init(&lock);
+    pthread_mutex_init(&lock, NULL);
 
     pthread_create(&thread, NULL, read_named_pipe, NULL);
 
@@ -72,24 +165,26 @@ int main()
         switch (CONFIG_UPDATE_FLAG)
         {
         case _KILL_ALL:
-            pthread_mutex_lock(lock);
+            pthread_mutex_lock(&lock);
+            kill_all_process();
             RUNNING = 0;
             CONFIG_UPDATE_FLAG = 0;
-            pthread_mutex_unlock(lock);
+            pthread_mutex_unlock(&lock);
             break;
         case _CONFIG_UPDATE:
             if (-1 == get_process_config())
                 return (-1);
 
-            pthread_mutex_lock(lock);
+            pthread_mutex_lock(&lock);
             CONFIG_UPDATE_FLAG = 0;
-            pthread_mutex_unlock(lock);
+            pthread_mutex_unlock(&lock);
             break;
         case _RUN_ALL:
-            pthread_mutex_lock(lock);
+            pthread_mutex_lock(&lock);
+            run_all_process();
             RUNNING = 1;
             CONFIG_UPDATE_FLAG = 0;
-            pthread_mutex_unlock(lock);
+            pthread_mutex_unlock(&lock);
         default:
             break;
         }
@@ -114,8 +209,9 @@ RUNNING_TABLE *get_running_table(char *exnm, char *procname)
     RUNNING_TABLE temp;
 
     strcpy(temp.exchange, exnm);
+    strcpy(temp.procname, procname);
 
-    return (bsearch(&temp, running_table, sizeof(RUNNING_TABLE) * MAX_EXCHANGE, sizeof(RUNNING_TABLE), cmp_run_table));
+    return (bsearch(&temp, running_table, RUNNING_TABLE_VREC, sizeof(RUNNING_TABLE), cmp_run_table));
 }
 
 RUNNING_TABLE *new_running_table(char *exnm, char *procname)
@@ -131,7 +227,7 @@ RUNNING_TABLE *new_running_table(char *exnm, char *procname)
     memcpy(&running_table[RUNNING_TABLE_VREC++], &temp, sizeof(RUNNING_TABLE));
     qsort(running_table, RUNNING_TABLE_VREC, sizeof(RUNNING_TABLE), cmp_run_table);
 
-    return (get_running_table(exnm));
+    return (get_running_table(exnm, procname));
 }
 
 void del_running_table(char *exnm, char *procname)
@@ -158,8 +254,10 @@ int run_process(char *exnm, char *procname)
     RUNNING_TABLE *run_table;
     char cmd[512];
     pid_t pid;
-    char *args[] = {procname, exnm, NULL};
-    int ii;
+
+    sprintf(cmd, "%s/%s", BIN_DIR, procname);
+
+    char *args[] = {cmd, exnm, NULL};
 
     sprintf(cmd, "%s/%s", BIN_DIR, procname);
 
@@ -187,7 +285,7 @@ int run_process(char *exnm, char *procname)
         if (execv(cmd, args) == -1)
         {
             del_running_table(exnm, procname);
-            writelog("%s is aborted..!", cmd);
+            writelog("'%s' is aborted..!", cmd);
             exit(0);
         }
 
@@ -198,7 +296,8 @@ int run_process(char *exnm, char *procname)
     {
         run_table = new_running_table(exnm, procname);
         run_table->pid = pid;
-        return (0);
+        sprintf(run_table->command, "%s %s", cmd, exnm);
+        writelog("'%s' start..!", run_table->command);
     }
 
     return (0);
@@ -216,7 +315,7 @@ int kill_process(char *exnm, char *procname)
 
     if (kill(run_table->pid, SIGTERM) == 0)
     {
-        writelog("%s for %s process is killed.", run_table->procname, run_table->exchange);
+        writelog("'%s' is killed.", run_table->command);
         del_running_table(exnm, procname);
         return (0);
     }
@@ -224,7 +323,7 @@ int kill_process(char *exnm, char *procname)
     return (0);
 }
 
-int kill_all_process()
+void kill_all_process()
 {
     int ii;
 
@@ -233,8 +332,6 @@ int kill_all_process()
         kill_process(process_config[ii].exchange, COMMAND1);
         kill_process(process_config[ii].exchange, COMMAND2);
     }
-
-    return (0);
 }
 
 int run_all_process()
@@ -266,7 +363,6 @@ int run_all_process()
 
 int check_all_process()
 {
-    RUNNING_TABLE *run_table;
     int ii;
 
     for (ii = 0; ii < EXCHANGE_VREC; ii++)
@@ -292,18 +388,20 @@ int check_all_process()
     }
 }
 
-int create_named_pipe()
+int create_named_pipe(char *pipe)
 {
-    sprintf(RECV_PIPE, "%s/RECV_PIPE", TMP_DIR);
-    sprintf(SEND_PIPE, "%s/SEND_PIPE", TMP_DIR);
+    if (access(pipe, F_OK) == 0)
+    {
+        return 0; // Pipes already exist
+    }
 
-    if (mkfifo(RECV_PIPE, 0666) != 0 || mkfifo(SEND_PIPE, 0666) != 0)
+    if (mkfifo(pipe, 0666) != 0)
     {
         writelog("Failed to create pipes.");
         return (-1);
     }
 
-    writelog("Pipes successfully created.");
+    writelog("'%s' pipe successfully created.", pipe);
     return (0);
 }
 
@@ -341,25 +439,53 @@ void read_named_pipe(void *argv)
 
                 if (strcmp(msgb, CONFIG_UPDATE_MSG) == 0)
                 {
-                    pthread_mutex_lock(lock);
+                    pthread_mutex_lock(&lock);
                     CONFIG_UPDATE_FLAG = _CONFIG_UPDATE;
-                    pthread_mutex_unlock(lock);
+                    pthread_mutex_unlock(&lock);
                 }
                 else if (strcmp(msgb, KILL_ALL_MSG) == 0)
                 {
-                    pthread_mutex_lock(lock);
+                    pthread_mutex_lock(&lock);
                     CONFIG_UPDATE_FLAG = _KILL_ALL;
-                    pthread_mutex_unlock(lock);
+                    pthread_mutex_unlock(&lock);
                 }
                 else if (strcmp(msgb, RUN_ALL_MSG) == 0)
                 {
-                    pthread_mutex_lock(lock);
+                    pthread_mutex_lock(&lock);
                     CONFIG_UPDATE_FLAG = _RUN_ALL;
-                    pthread_mutex_unlock(lock);
+                    pthread_mutex_unlock(&lock);
                 }
             }
         }
     }
+
+    close(fd);
+    pthread_exit(NULL);
+}
+
+int send_named_pipe(char *pipe, char *msg)
+{
+    int fd;
+
+    if (access(pipe, F_OK) != 0)
+    {
+        return -1;
+    }
+
+    fd = open(pipe, O_WRONLY);
+
+    if (fd == -1)
+    {
+        return -1;
+    }
+
+    if (write(fd, msg, strlen(msg)) == -1)
+    {
+        return -1;
+    }
+
+    close(fd);
+    return (0);
 }
 
 int get_process_config()
@@ -376,7 +502,7 @@ int get_process_config()
 
     if (!rootValue)
     {
-        main_log("Cannot get the root value from '%s' file", filename);
+        writelog("Cannot get the root value from '%s' file", filename);
         return -1;
     }
 
@@ -403,8 +529,7 @@ void clean_zombie_process(int signo)
 {
     pid_t xpid;
     int checked;
-    int ii, jj;
-    char cmd[512];
+    int ii;
 
     for (;;)
     {
@@ -420,8 +545,7 @@ void clean_zombie_process(int signo)
                 checked = 1;
                 del_running_table(running_table[ii].exchange, running_table[ii].procname);
 
-                sprintf(cmd, "%s/%s", BIN_DIR, running_table[ii].procname);
-                writelog("%s is aborted..!", cmd);
+                writelog("%s is aborted..!", running_table[ii].command);
             }
         }
     }

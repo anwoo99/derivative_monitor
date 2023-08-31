@@ -166,6 +166,27 @@ void recv_to_fep(void *argv)
     pthread_exit(NULL);
 }
 
+int remove_old_folder(FEP *fep, PORT *port)
+{
+    MDARCH *arch = (MDARCH *)fep->arch;
+    FOLDER *folder = (FOLDER *)fep->fold;
+    int ii;
+    time_t current = time(NULL);
+    double difference;
+
+    for (ii = 0; ii < arch->vrec; ii++)
+    {
+        difference = difftime(current, folder[ii].mstr.updated_at);
+
+        if (difference > 60 * 60 * 24 * 7) // 7 DAYS
+        {
+            delfolder(fep, &folder[ii]);
+        }
+    }
+    
+    return (0);
+}
+
 int main_process(FEP *fep, PORT *port, char *msgb, int msgl)
 {
     uint32_t class_tag = 0x00;
@@ -186,6 +207,13 @@ int main_process(FEP *fep, PORT *port, char *msgb, int msgl)
         else if (arch->mstr_update[port->seqn] == 1 && (class_tag & NONE))
         {
             arch->mstr_update[port->seqn] = 0;
+
+            /* 마스터 수신이 종료되는 시점에 old 폴더 체크 */
+            if ((arch->mstr_flag - 1) == 0)
+            {
+                remove_old_folder(fep, port);
+            }
+
             arch->mstr_flag--;
         }
     }

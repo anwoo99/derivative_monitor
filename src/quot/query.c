@@ -286,7 +286,7 @@ static int query4list(int key, int qform)
 		if (strcmp(fold[ii].hostname, fold[ii + 1].hostname) != 0)
 		{
 			if (strcmp(fold[ii + 1].hostname, s_host) == 0)
-				min_indx = ii;
+				min_indx = ii + 1;
 			else if (strcmp(fold[ii].hostname, s_host) == 0)
 				max_indx = ii;
 			continue;
@@ -326,8 +326,8 @@ static int query4list(int key, int qform)
 	if (indx % 45)
 		indx -= (indx % 45);
 
-	if (indx < min_indx || indx >= max_indx)
-		return (0);
+	//if (indx < min_indx || indx >= max_indx)
+	//	return (0);
 
 	sprintf(buff, "%d of %d", indx + 1 - min_indx, max_indx - min_indx + 1);
 	pushfld("MANY", buff, FC_WHITE, 0);

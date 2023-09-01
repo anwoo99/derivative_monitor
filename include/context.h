@@ -27,6 +27,7 @@ typedef struct
     int vrec;
     int mstr_update[MAX_PORT];
     int mstr_flag;
+    pthread_mutex_t master_mutex;
 } MDARCH;
 
 unsigned long djb2(const char *str);

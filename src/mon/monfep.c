@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
     }
 
     MDARCH *arch = (MDARCH *)fep->arch;
-    pthread_mutex_init(&arch->master_mutex);
+    pthread_mutex_init(&arch->master_mutex, NULL);
 
     for (ii = 0; ii < fep->config.nport; ii++)
     {

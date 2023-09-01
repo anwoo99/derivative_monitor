@@ -76,8 +76,11 @@ FOLDER *newfolder(FEP *fep, const char *symb, const char *hostname)
     f.created_at = current;
     f.mstr.created_at = current;
 
+
+    pthread_mutex_lock(&mdarch->master_mutex);
     memcpy(&folder[mdarch->vrec++], &f, sizeof(FOLDER));
     qsort(folder, mdarch->vrec, sizeof(FOLDER), cmpfold);
+    pthread_mutex_unlock(&mdarch->master_mutex);
 
     return (getfolder(fep, symb, hostname));
 }

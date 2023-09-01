@@ -63,15 +63,15 @@ void mon_log_write(FEP *fep, char *logpath, const char *format, ...)
     struct stat lstat;
     char logmsg[1024 * 8];
     FILE *logF;
-
+    char master_dump[256];
+ 
     utc_time = time(0);
     fep_utc2kst(utc_time, &korean_time, &korean_tm);
 
-    if (stat(logpath, &lstat) == 0 && strcmp(logpath, "MASTER.dump") == 0)
+    if (stat(logpath, &lstat) == 0 && strstr(logpath, "MASTER.dump") != NULL)
     {
         fep_utc2kst(lstat.st_mtime, &modified_time, &modify_tm);
-
-        mode[0] = (difftime(korean_time, modified_time) > MASTER_NEW_INTERVAL) ? 'w' : 'a';
+        mode[0] = (difftime(korean_time, modified_time) > MASTER_NEW_INTERVAL) ? 'w' : 'a'; 
     }
 
     snprintf(logmsg, sizeof(logmsg), "[%02d:%02d:%02d] ", korean_tm.tm_hour, korean_tm.tm_min, korean_tm.tm_sec);

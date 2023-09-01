@@ -42,6 +42,9 @@ int main(int argc, char *argv[])
         return (0);
     }
 
+    MDARCH *arch = (MDARCH *)fep->arch;
+    pthread_mutex_init(&arch->master_mutex);
+
     for (ii = 0; ii < fep->config.nport; ii++)
     {
         if (fep->config.ports[ii].running == false)

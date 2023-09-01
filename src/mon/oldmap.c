@@ -42,7 +42,9 @@ int old_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *class_tag)
 
    if (*class_tag & MASTER)
    {
+      pthread_mutex_lock(&arch->master_mutex);
       old_master_map(fep, port, msgb, msgl, class_tag);
+      pthread_mutex_unlock(&arch->master_mutex);
    }
    else if (*class_tag & TRADE)
    {

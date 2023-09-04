@@ -20,6 +20,7 @@ INCF=../../main.h ../../context.h ../../config.h ../../parson.h ../../schema.h .
 # Default Rules:
 .c:
 	$(CC) $(CFLAGS) $(LFLAGS) $< -o $@
+
 .c~:
 	$(GET) $(GFLAGS) -p $< > $*.c
 	$(CC) $(CFLAGS) $(LFLAGS) $*.c -o $@
@@ -43,7 +44,7 @@ $(S_GFLIB): $(X_GFLIB)
 
 $(X_GFLIB): $(OBJF)
 	$(AR) -rcs $@ $(OBJF)
-	if [ -s /usr/bin/ranlib ]; then ranlib $@; fi
+	if [ -s /usr/bin/ranlib ]; then ranlib $(X_GFLIB); fi
 	@echo $(X_GFLIB) is up-to-date.
 
 install: all

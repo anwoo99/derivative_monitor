@@ -379,8 +379,10 @@ int rtd_push(struct pushdata *pushdata)
 	errno = ESRCH;
 	strcpy(s_symb.symb, pushmsg->symb);
 	f_symb = (struct symb *)bsearch(&s_symb, __rt_symbol->symb, __rt_symbol->valr, sizeof(__rt_symbol->symb[0]), _cmp_symb);
+
 	if (f_symb == NULL)
 		return (0);
+
 	seqn = f_symb->seqn;
 	if (seqn < 0 || seqn >= __rt_board->no_of_symbols)
 		return (-1);

@@ -13,7 +13,7 @@ AFLAGS=$(MY_AFLAGS)
 X_GFLIB=libMAIN.a
 S_GFLIB=libMAIN.so
 
-OBJF=config.o log.o open.o shm.o parson.o close.o file.o time.o folder.o xmlcfg.o rtd.o rtp.o
+OBJF=config.o log.o open.o shm.o parson.o close.o file.o time.o folder.o xmlcfg.o rtd.o rtp.o push.o
 
 INCF=../../main.h ../../context.h ../../config.h ../../parson.h ../../schema.h ../../push.h ../../quot.h
 

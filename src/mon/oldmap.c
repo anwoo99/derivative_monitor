@@ -520,6 +520,8 @@ int old_quote_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *cl
 
    quote_log(fep, folder->hostname, *class_tag, "%s V:%d T:%u L:%f O:%f H:%f L:%f", code, quote->tqty, quote->tvol, quote->last, quote->open, quote->high, quote->low);
 
+   fep_push(fep, folder, 0);
+
    return (0);
 }
 
@@ -614,6 +616,8 @@ int old_cancel_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *c
    cancel->updated_at = current;
 
    quote_log(fep, folder->hostname, *class_tag, "%s V:%d T:%u L:%f O:%f H:%f L:%f", code, cancel->tqty, cancel->tvol, cancel->last, cancel->open, cancel->high, cancel->low);
+
+   fep_push(fep, folder, 1);
 
    return (0);
 }
@@ -820,6 +824,8 @@ int old_depth_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *cl
 
    depth->updated_at = current;
 
+   fep_push(fep, folder, 2);
+
    return (0);
 }
 
@@ -895,6 +901,8 @@ int old_lme_quote_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t
    quote->updated_at = current;
 
    quote_log(fep, folder->hostname, *class_tag, "%s V:%d T:%d L:%f O:%f H:%f L:%f diff:%f pb:%f pa:%f dt:%d", code, quote->tqty, quote->tvol, quote->last, quote->open, quote->high, quote->low, quote->diff, quote->pbid, quote->pask, quote->date);
+
+   fep_push(fep, folder, 0);
 
    return (0);
 }

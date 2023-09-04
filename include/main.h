@@ -134,4 +134,7 @@ FOLDER *getfolder(FEP *fep, const char *symb, const char *hostname);
 FOLDER *newfolder(FEP *fep, const char *symb, const char *hostname);
 void delfolder(FEP *fep, FOLDER *folder);
 
+/* push.c type=0(QUOTE) 1(CANCEL) 2(DEPTH) */
+int fep_push(FEP *fep, FOLDER *folder, int type);
+
 #endif

@@ -313,6 +313,8 @@ int ext_quote_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *cl
 
     quote_log(fep, folder->hostname, *class_tag, "%s V:%d T:%u L:%f O:%f H:%f L:%f", code, quote->tqty, quote->tvol, quote->last, quote->open, quote->high, quote->low);
 
+    fep_push(fep, folder, 0);
+
     return (0);
 }
 
@@ -471,6 +473,8 @@ int ext_depth_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *cl
     cross_check(fep, port, depth, fep->config.raw_data.cross_check);
 
     depth->updated_at = current;
+
+    fep_push(fep, folder, 2);
 
     return (0);
 }

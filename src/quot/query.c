@@ -297,13 +297,14 @@ static int query4list(int key, int qform)
 	{
 		for (ii = 0; ii < mdarch->vrec; ii++)
 		{
-			if (strcmp(fold[ii].symb, s_symb) >= 0 && strcmp(fold[ii].hostname, s_host) >= 0)
+			if (strcmp(fold[ii].symb, s_symb) >= 0 && strcmp(fold[ii].hostname, s_host) == 0)
 				break;
 		}
 		indx = ii;
 	}
 	else
 		indx = min_indx;
+
 
 	switch (key)
 	{
@@ -320,23 +321,27 @@ static int query4list(int key, int qform)
 		break;
 	}
 
+	//if (indx % 45)
+	//	indx -= (indx % 45);
+	
 	if (indx < min_indx)
 		indx = min_indx;
 
-	if (indx % 45)
-		indx -= (indx % 45);
 
-	//if (indx < min_indx || indx >= max_indx)
-	//	return (0);
+	if (indx < min_indx || indx > max_indx)
+	{
+		return (0);
+	}
+
 
 	sprintf(buff, "%d of %d", indx + 1 - min_indx, max_indx - min_indx + 1);
 	pushfld("MANY", buff, FC_WHITE, 0);
 
-	for (ii = min_indx; ii < 45 && indx < max_indx; ii++, indx++)
+	for (ii = 0; ii < 45 && indx < max_indx; ii++, indx++)
 	{
 		folder = &fold[indx];
 
-		if (ii == min_indx)
+		if (ii == 0)
 		{
 			strcpy(s_symb, folder->symb);
 			str2fld("iSYMB", folder->symb);
@@ -345,18 +350,18 @@ static int query4list(int key, int qform)
 		update(folder, qform, 0, ii);
 	}
 
-	if (indx > 0)
+	if (indx > min_indx)
 	{
 		enable_pgup = 1;
 		enable_prev = 1;
 	}
 
-	if (indx < mdarch->vrec - 1)
+	if (indx < max_indx)
 	{
 		enable_pgdn = 1;
 		enable_next = 1;
 	}
-
+	
 	cur2fld("iSYMB");
 	return (0);
 }

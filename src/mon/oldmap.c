@@ -811,12 +811,12 @@ int old_depth_trade_map(FEP *fep, PORT *port, char *msgb, int msgl, uint32_t *cl
    for (ii = 0; ii < MD_MAX_DEPTH; ii++)
    {
       STR2FLOAT(&depth->ask[ii].price, trade->book[ii].askp, sizeof(trade->book[ii].askp));
-      STR2UINT(&depth->ask[ii].total, trade->book[ii].askn, sizeof(trade->book[ii].askn));
-      STR2UINT(&depth->ask[ii].qtqy, trade->book[ii].askq, sizeof(trade->book[ii].askq));
+      STR2UINT(&depth->ask[ii].total, trade->book[ii].askq, sizeof(trade->book[ii].askn));
+      STR2UINT(&depth->ask[ii].qtqy, trade->book[ii].askn, sizeof(trade->book[ii].askq));
 
       STR2FLOAT(&depth->bid[ii].price, trade->book[ii].bidp, sizeof(trade->book[ii].bidp));
-      STR2UINT(&depth->bid[ii].total, trade->book[ii].bidn, sizeof(trade->book[ii].bidn));
-      STR2UINT(&depth->bid[ii].qtqy, trade->book[ii].bidq, sizeof(trade->book[ii].bidq));
+      STR2UINT(&depth->bid[ii].total, trade->book[ii].bidq, sizeof(trade->book[ii].bidn));
+      STR2UINT(&depth->bid[ii].qtqy, trade->book[ii].bidn, sizeof(trade->book[ii].bidq));
    }
 
    /* Depth Cross Check */

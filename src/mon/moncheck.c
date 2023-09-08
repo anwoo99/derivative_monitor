@@ -75,8 +75,6 @@ int _not_received(FEP *fep, PORT *port, uint32_t *class_tag, time_t *current, st
                 return (0);
 
             port->master_status = _NOT_RECEIVE_FLAG;
-            max_alert = 1;
-            sprintf(message, "마스터 데이터가 수신되지 않았습니다.");
         }
         else // 그 외 데이터인 경우
         {
@@ -84,15 +82,20 @@ int _not_received(FEP *fep, PORT *port, uint32_t *class_tag, time_t *current, st
             max_alert = MAX_ALERT;
             diff = difftime(*current, port->last_received);
             sprintf(message, "데이터가 %.3f초 동안 수신되지 않습니다.", diff);
-        }
 
-        if (port->alert_count < max_alert)
-        {
-            mon_send_cmefnd(fep, port, message, 1);
-            port->alert_count += 1;
+            if (port->alert_count < max_alert)
+            {
+                mon_send_cmefnd(fep, port, message, 1);
+                port->alert_count += 1;
+            }
         }
         break;
     case 0: // 모니터링 미 해당 시간대(초기화)
+        if ((*class_tag & MASTER) && (port->master_status == _NOT_RECEIVE_FLAG))
+        {
+            sprintf(message, "마스터 데이터가 수신되지 않았습니다.");
+            mon_send_cmefnd(fep, port, message, 1);
+        }
         port->last_received = *current;
         port->trade_status = _DEFAULT_RECEIVE_FLAG;
         port->master_status = _DEFAULT_RECEIVE_FLAG;

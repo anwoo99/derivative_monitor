@@ -56,7 +56,7 @@ FEP *fep_open(const char *exnm, int flag)
     }
 
     /* Timezone Setting */
-    putenv(fep->config.settings.timezone);
+    setenv("TZ", fep->config.settings.timezone, 1);
     tzset();
 
     /* Get the running process name */

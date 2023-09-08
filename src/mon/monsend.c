@@ -13,15 +13,12 @@ int mon_send_cmefnd(FEP *fep, PORT *port, char *message, int send_flag)
     struct sockaddr_in cmefnd;
     int tcp_socket = 0;
 
-    if (port->alert == false)
-        return (0);
-
     sprintf(msgb, "[%s] [%s-%s] %s", port->host, fep->exnm, port->name, message);
     sprintf(encoded_data, "%s%s=%s%s", DELIM, MARKET_ALERT_TOKEN, msgb, DELIM);
 
     fep_log(fep, FL_PROGRESS, GET_CALLER_FUNCTION(), "%s", msgb);
 
-    if (!send_flag)
+    if (!send_flag || port->alert == false)
         return (0);
 
     memset(&cmefnd, 0x00, sizeof(cmefnd));

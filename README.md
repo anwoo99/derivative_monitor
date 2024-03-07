@@ -217,7 +217,6 @@ usage : monipcx [exchange_name]
 |timezone|STRING|거래소 타임존|/usr/share/zoneinfo 내에서 선택|
 |room|NUM|품목 등록 가능 개수|
 |logLevel|STRING|로그레벨|DEBUG/PROGRESS/ERROR/MUST|
-|||
 
 <br>
 
@@ -228,7 +227,6 @@ usage : monipcx [exchange_name]
 |max_date|NUM|로그 남기는 일수 최대치|
 |depth_log|NUM|호가 로그 남길지 여부|1 or 0
 |cross_check|NUM|호가역전 체크여부|1 or 0
-|||
 
 <br>
 
@@ -246,7 +244,6 @@ usage : monipcx [exchange_name]
 |port|NUM|Multicast PORT|
 |nic|STRING|수신용 Nic 명칭|
 |times|ARRAY|wday: 데이터 정상 수신 요일 <br> window: 데이터 정상 수신 시간대|
-|||
 
 <br>
 
